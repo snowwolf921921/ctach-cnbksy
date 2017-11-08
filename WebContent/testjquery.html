@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+    <div class='com clearfix'><a href="javascript:void(0);"  onclick="return false;"name="<%=contId %>" class="fr btn">删除</a><%=cont %></div>
+    <div class="replyCon clearfix"><a href="javascript:void(0);" onclick="return false;" name="<%=contId %>" class="fr btn">删除</a><%=rev %></div>
+    <div class="replyForm clearfix"><a href="#" class="fr btn">回复</a><textarea>在此输入！</textarea></div>
+    
+	<input type="button" value="1" onclick="func1()" />
+    <input type="button" value="2" onclick="func2()" />
+    <input type="button" value="3" onclick="func3()" />
+    <input type="button" value="4" onclick="func4()" />
+    <script>
+        var func1 = function () {
+            $(".clearfix a").text("aaa");
+        }
+        var func2 = function () {
+            $(".clearfix a:first").text("aa1");
+            //$(".clearfix a").eq(0).text("aa1"); 
+        }
+        var func3 = function () {
+            $(".clearfix a").eq(1).text("aa2");
+        }
+        var func4 = function () {
+            $(".clearfix a:last").text("aa3");
+        }
+    </script>
+</body>
+</html>
