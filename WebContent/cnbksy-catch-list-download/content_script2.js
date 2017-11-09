@@ -1,4 +1,4 @@
-﻿var bAllowNextPage = true;
+﻿﻿var bAllowNextPage = true;
 var bAllowDl = true;
 var waitingDownload=false;
 var intInterval;
