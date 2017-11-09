@@ -189,6 +189,7 @@ function getFormatedAndAuthorAndBookinfo(dObject){
 }
 function download(currentDownloadPageIndex){
 //	currentDownloadInfo2 {pageNo,totalNo,pageIndex}
+//初步想法：将下载的总信息放在 bg中，因为cs每次激活都会从新执行，以总信息作为循环依据，并修改成单项下载
 	var currentDownloadInfo2={}
 	currentDownloadInfo2.pageNo=needDownloadList[currentDownloadPageIndex].pageNo;
 	currentDownloadInfo2.totalNo=needDownloadList[currentDownloadPageIndex].totalNo;
@@ -242,7 +243,7 @@ function getDomainFromUrl(url){
 }
 
 function checkForValidUrl(tabId, changeInfo, tab) {
-	if(getDomainFromUrl(tab.url).toLowerCase()=="www.cnblogs.com"){
+	if(toolGetDomainFromUrl(tab.url).toLowerCase()=="www.cnblogs.com"){
 		chrome.pageAction.show(tabId);
 	}
 };	

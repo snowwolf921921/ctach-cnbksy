@@ -1,22 +1,5 @@
-/*document.addEventListener('DOMContentLoaded', function () {
-	var data = chrome.extension.getBackgroundPage().trsData;
-	if(data.html.length){
-		$("#message").text(data.error);
-		$("#content").hide();
-	}else{
-		
-		$("#content").children("table").children("tbody").children("tr").last().after(data.html);	
-		$("#message").hide();
-		$("#content-title").text(data.title);
-		$("#content-author").text(data.author);
-		$("#content-date").text(data.postDate);
-		$("#content-first-access").text(data.firstAccess);
-	}
-});
-*/
 chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 	if(request.type=="wolf-catch-pagedata-topopup"){
-//		alert(1);
 		getData();
 	}else if(request.type=="current-download-item-info"){
 		
@@ -24,8 +7,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 	}else{
 		return;
 	}
-		
-	
 });
 function getData() {                          
 	var totalData = chrome.extension.getBackgroundPage().totalData;     
