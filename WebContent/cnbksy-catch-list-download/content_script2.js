@@ -90,24 +90,13 @@ function catchStop(request, sender, sendRequest) {
 				//if (request.pageIndex<needDownloadList.length&&!bAllowDl) 还没下载完就暂停下载的情况
 				stopCatchAndDl();
 			}
-			
 		}
 	}else{
 		return;
 	}
 	
 };
-//test
-/*chrome.runtime.onConnect.addListener(function(port) {  console.assert(port.name == "con1")}); 
-var port = chrome.runtime.connect({name: "con1"});
-port.onMessage.addListener(catchStop);*/
-//testwan
 chrome.runtime.onMessage.addListener(catchStop);
-//chrome.tabs.onActivated.addListener(catchStop);
-/*chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {   
-	  stopTimer();   
-	  checkByTabid(tabId);   
-	}); */
 function removeHTMLTag(str) {
 	str = str	; //去除HTML tag
 	str = str.replace(/[ | ]*\n/g, '\n'); //去除行尾空白
@@ -131,7 +120,6 @@ function getTableDataAndDl(currentPageNo){
 			pageDispalyText : '',
 			rowEmpty:false	
 		};
-
 	var jStop=0;
 	var currentPageCount=Number($("#srPageCount").val());
 	waitingDownload=false;
@@ -147,34 +135,6 @@ function getTableDataAndDl(currentPageNo){
 		row.no=i;
 		//第一tab，正文
 		trOne=$("table[type-id='1']").find(".resultRow").eq(i)[0];
-		/*代码示例
-		 * <div class="resultRow">
-        <table class="fullwidth">
-            <tbody><tr>
-                <td class="srLineSelected">
-                        <input type="checkbox" dataid="58fb46508fefac485987448ab9a9f4bb" laid="8">
-                </td>
-                <td>
-                    <a href="/search/detail/58fb46508fefac485987448ab9a9f4bb/8/4833584" target="_blank">基于Pareto最优解的梯级泵站双目标优化调度</a><br>
-                    <div class="fr" style="color:#505050;text-align: right;min-width: 350px;">
-                        <a href="javascript:void(0);" onclick="searchAuthor('梁兴')">梁兴</a>
-                        <a href="javascript:void(0);" onclick="searchAuthor('刘梅清')">刘梅清</a>
-                        <a href="javascript:void(0);" onclick="searchAuthor('燕浩')">燕浩</a>
-                              <!-- 现刊 -->
-                        &nbsp;&nbsp;《武汉大学学报:工学版》&nbsp;&nbsp;
-                        2015年 [48卷 2期，156-159,165页]
-                    </div>
-                </td>
-            </tr>
-        </tbody></table>
-    </div>
-		 */
-		//title	
-//		$(".resultRow").eq(5).find("td").eq(1).find("a").eq(0)[0].innerText
-		//		多个作者，等 如 ：梁兴 刘梅清 燕浩   《武汉大学学报:工学版》   2015年 [48卷 2期，156-159,165页]
-//		$(".resultRow").eq(5).find("td").eq(1).find("div")[0].innerText
-//无格式		row.text=removeHTMLTag(trOne.innerText);
-//加入|格式
 		title1=$(trOne).find("td").eq(1).children("a").eq(0)[0].innerText;
 		title2=$(trOne).find("td").eq(1).children("a").length>1?$(trOne).find("td").eq(1).children("a").eq(1)[0].innerText:"";
 		row.text=title1+"|"+title2+"|"
@@ -193,7 +153,6 @@ function getTableDataAndDl(currentPageNo){
 			currentDownloadInfo.pageNo=i;
 			currentDownloadInfo.totalNo=totalNo;
 			var as=$("a");
-//			alert($(trOne).find(as).eq(0).text());
 			currentDownloadInfo.title=$(trOne).find(as).eq(0).text()
 			needDownloadList.push(currentDownloadInfo);
 			waitingDownload=true;
@@ -204,10 +163,8 @@ function getTableDataAndDl(currentPageNo){
 	if(waitingDownload){
 		stopCatch();
 		bAllowDl=true;
-//		currentDownloadPageNo=needDownloadList[0];
 		currentDownloadPageIndex=0;
 		download(currentDownloadPageIndex);
-		
 	}
 /*	pageNo pageIndex  totalNo 
        0
@@ -215,8 +172,6 @@ function getTableDataAndDl(currentPageNo){
 	   2 * 0          13
 	   3
 	   4 * 1          15*/
-
-	
 	return data;
 };
 function getFormatedAndAuthorAndBookinfo(dObject){
@@ -228,25 +183,8 @@ function getFormatedAndAuthorAndBookinfo(dObject){
 	if(authorsAndBookinfoText.indexOf("《")>0){//中文期刊
 		var bookInfoText=authorsAndBookinfoText.substr(authorsAndBookinfoText.indexOf("《"),authorsAndBookinfoText.length);
 	}else{//英文期刊 如下例
-		/*<div class="fr" style="color:#505050;text-align: right;min-width: 350px;">
-        <a href="javascript:void(0);" onclick="searchAuthor('')"></a>
-        <a href="javascript:void(0);" onclick="searchAuthor('')"></a>
-        <a href="javascript:void(0);" onclick="searchAuthor('')"></a>
-              <!-- 中文报纸 或者 外文报纸 -->
-        &nbsp;&nbsp;<a target="_blank" href="/literature/newspaper/2fd3595d726520b71f6296be0751145d">
-        <i>The North-China Herald and Supreme Court &amp; Consular Gazette(1870-1941)</i>
-        </a>&nbsp;&nbsp;
-        1923年9月1日
-        [042版]
-        <br>
-        </div>*/
 		var bookInfoText=authorsAndBookinfoText.substr(divObject.find("i").eq(0)[0].innerText,authorsAndBookinfoText.length);
-
 	}
-	
-//	$(".resultRow").eq(5).find("td").eq(1).find("div")[0].innerText.indexOf("《")
-//	$(".resultRow").eq(5).find("td").eq(1).find("div")[0].innerText.substr(12,$(".resultRow").eq(5).find("td").eq(1).find("div")[0].innerText.length)
-//	return title+"|"+authors+"|"+bookInfoText;
 	return authors+"|"+bookInfoText;
 }
 function download(currentDownloadPageIndex){
@@ -257,19 +195,15 @@ function download(currentDownloadPageIndex){
 	currentDownloadInfo2.title=needDownloadList[currentDownloadPageIndex].title;
 	currentDownloadInfo2.pageIndex=currentDownloadPageIndex;
 	currentDownloadPageNo=currentDownloadInfo2.pageNo;
-	
-//	var images=$("img[src='/static/images/download.gif']");
 	var images=$("img[src='/public/portal/image/download.gif']");
 	var trOneJ=$(".resultRow").eq(currentDownloadPageNo);
 	if (trOneJ.find(images).length>0){
 		click(trOneJ.find(images).parent()[0]);
 	}
-	
 	var msgDownload = {};
 	msgDownload.type = "current-download-item-info";
 	msgDownload.currentDownloadInfo2=currentDownloadInfo2;
 	chrome.runtime.sendMessage(msgDownload);
-	
 }
 function click(el) {
 	var e = document.createEvent('MouseEvent');
@@ -312,16 +246,3 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 		chrome.pageAction.show(tabId);
 	}
 };	
-
-/*chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
-//	suggest({filename: item.filename,
-	  suggest({filename: "test.txt",
-	           conflict_action: 'overwrite',
-	           conflictAction: 'overwrite'});
-	  // conflict_action was renamed to conflictAction in
-	  // https://chromium.googlesource.com/chromium/src/+/f1d784d6938b8fe8e0d257e41b26341992c2552c
-	  // which was first picked up in branch 1580.
-	});
-
-*/
-//$(document).ready(getDataAndNextPage)
