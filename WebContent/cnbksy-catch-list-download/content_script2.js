@@ -68,7 +68,7 @@ function catchStop(request, sender, sendRequest) {
 				itemsAmountPerPage:0,
 				currentDPageIndex:0,  //1开始
 				currentDItemIndexInTotal:0,//1开始
-				currentDItemIndexInPage:0,//1开始
+//				currentDItemIndexInPage:0,//1开始
 				
 		};
 		totalInfoAndCurrentDownloadInfo.totalItemsAmount=Number($(tagTotalItemsAmount).text());

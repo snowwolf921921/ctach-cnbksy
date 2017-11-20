@@ -3,7 +3,7 @@
 	totalPageAmount : 0,
 	currentDPageIndex : 0, // 1开始
 	currentDItemIndexInTotal : 0,// 1开始
-	currentDItemIndexInPage : 0,// 1开始
+//	currentDItemIndexInPage : 0,// 1开始
 };
 currentDownloadInfo2.pageNo = needDownloadList[currentDownloadPageIndex].pageNo;
 currentDownloadInfo2.totalNo = needDownloadList[currentDownloadPageIndex].totalNo;
@@ -84,8 +84,10 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 	totalData.downloadStatus = "已经下载:" + currentDownloadInfo2.totalNo + "-"
 			+ item.filename
 	var msgDlNext = {};
-	msgDlNext.type = "download-nextPageIndex";
-	msgDlNext.pageIndex = Number(currentDownloadInfo2.pageIndex) + 1;
+	//新改动
+	msgDlNext.type = "msg-catch&downloadThisItem-withTotalInfo";
+	totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
+	msgDlNext.totalInfoAndCurrentDownloadInfo = totalInfoAndCurrentDownloadInfo;
 	// 通知cs下载下一个
 	chrome.tabs.query({
 		// active : true,
