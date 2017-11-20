@@ -1,8 +1,15 @@
-﻿var totalCatchjobInfo={
-		totalItemsNumber : 0,
-		totalPageNumber : 0 
+﻿var totalCatchjobInfoAndCurrentDownloadInfo = {
+	totalItemsAmount : 0,
+	totalPageAmount : 0,
+	currentDPageIndex : 0, // 1开始
+	currentDItemIndexInTotal : 0,// 1开始
+	currentDItemIndexInPage : 0,// 1开始
 };
-//};
+currentDownloadInfo2.pageNo = needDownloadList[currentDownloadPageIndex].pageNo;
+currentDownloadInfo2.totalNo = needDownloadList[currentDownloadPageIndex].totalNo;
+currentDownloadInfo2.title = needDownloadList[currentDownloadPageIndex].title;
+currentDownloadInfo2.pageIndex = currentDownloadPageIndex;
+
 var currentDownloadInfo2 = {};
 var totalData = {
 	jsonTotalDatas : [],
@@ -16,13 +23,32 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 	if (request.type == "wolf-catch-pagedata") {
 		totalData.firstAccess = "获取中...";
 		totalData.error = false;
-		totalData.jsonTotalDatas = totalData.jsonTotalDatas.concat(request.data.records);
+		totalData.jsonTotalDatas = totalData.jsonTotalDatas
+				.concat(request.data.records);
 		totalData.displayData += request.data.pageDispalyText;
 		var msg2 = {};
 		msg2.type = "wolf-catch-pagedata-topopup";
 		chrome.runtime.sendMessage(msg2);
 	} else if (request.type == "current-download-item-info") {
 		currentDownloadInfo2 = request.currentDownloadInfo2;
+	} else if (request.type == "msg-totalInfo") {
+		//放入本地变量存储：
+		totalInfoAndCurrentDownloadInfo=request.totalInfoAndCurrentDownloadInfo;
+		totalInfoAndCurrentDownloadInfo.currentDPageIndex=1;
+		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal=1;
+		totalInfoAndCurrentDownloadInfo.currentDItemIndexInPage=1;
+		//通知cs下载第一条；
+		var msgFirst={};
+		msgFirst.type="msg-catch&downloadThisItem-withTotalInfo";
+		msgFirst.type=totalInfoAndCurrentDownloadInfo;
+		chrome.tabs.query({
+			// active : true,
+			currentWindow : true
+		}, function(tabs) {
+			chrome.tabs.sendMessage(tabs[0].id, msgFirst, function(response) {
+				console.log(response.farewell);
+			});
+		});
 	}
 });
 function bStop() {
@@ -55,7 +81,8 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 		conflict_action : 'overwrite',
 		conflictAction : 'overwrite'
 	});
-	totalData.downloadStatus = "已经下载:" + currentDownloadInfo2.totalNo + "-" + item.filename
+	totalData.downloadStatus = "已经下载:" + currentDownloadInfo2.totalNo + "-"
+			+ item.filename
 	var msgDlNext = {};
 	msgDlNext.type = "download-nextPageIndex";
 	msgDlNext.pageIndex = Number(currentDownloadInfo2.pageIndex) + 1;
@@ -76,7 +103,8 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 		chrome.tabs.remove(tabs[0].id);
 	});
 	// chrome.runtime.onMessage.addListener(catchStop);
-	totalData.downloadStatus = "已经下载: " + currentDownloadInfo2.totalNo + "-" + item.filename + ";" + "将要下载: " + msgDlNext.pageIndex
+	totalData.downloadStatus = "已经下载: " + currentDownloadInfo2.totalNo + "-"
+			+ item.filename + ";" + "将要下载: " + msgDlNext.pageIndex
 
 });
 function checkForValidUrl(tabId, changeInfo, tab) {

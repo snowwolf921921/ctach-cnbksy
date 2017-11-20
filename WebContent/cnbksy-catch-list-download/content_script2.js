@@ -4,6 +4,11 @@ var waitingDownload=false;
 var intInterval;
 var currentDownloadInfo={};
 var needDownloadList=[];
+//html&css 相关变量 与页面相关信息
+var tagTotalItemsAmount="#queryCount";
+var tagItemsAmountPerPage="#srPageCount";
+
+
 function haveNextPage(){
 	//needchange
 	if($("#resultcontent").find("table").eq(0).find("li").last().find("a").hasClass("next")){
@@ -20,20 +25,7 @@ function nextPage() {
 		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
 	} 
 }
-/*function  checkAndNextPageIfNotWaitThenNext(){
-	if (haveNextPage()){
-		nextPage();
-	}else{
-		setTimeout(checkAndNextPageIfNotWaitThenNext(), 4000);
-	}
-}
-function  checkWhileAndNextPageIfNotWaitThenNext(){
-	if (haveNextPage()){
-		nextPage();
-	}else{
-		setTimeout(checkAndNextPageIfNotWaitThenNext(), 4000);
-	}
-}*/
+
 function  checkGetDataDlAndNextPage(){
 	if (finishLoad()){
 		getCurrentPageData();
@@ -65,14 +57,33 @@ function catchStop(request, sender, sendRequest) {
 //	alert(2);
 	if (request.type == "wolf-catch-stop") {
 		stopCatchAndDl();
+	} else if (request.type == "msg-catch&downloadThisItem-withTotalInfo") {
+//		取得itemIndex，catch一条并下载，
+		catchAndDownloadOneItem(request.totalInfoAndCurrentDownloadInfo);
 	} else if (request.type == "wolf-catch-start") {
-		bAllowNextPage = true;
-		//修改成 ajax方式
-		intInterval=window.setInterval("checkGetDataDlAndNextPage()",2000);
+		//获取总体信息，传到bg存储，以这些信息为循环信息
+		var totalInfoAndCurrentDownloadInfo={
+				totalItemsAmount : 0,
+				totalPagesAmount : 0 ,
+				itemsAmountPerPage:0,
+				currentDPageIndex:0,  //1开始
+				currentDItemIndexInTotal:0,//1开始
+				currentDItemIndexInPage:0,//1开始
+				
+		};
+		totalInfoAndCurrentDownloadInfo.totalItemsAmount=Number($(tagTotalItemsAmount).text());
+//		totalCatchjobInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagTotalItemsAmount));
+		totalInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagItemsAmountPerPage).val());
+		
+		var msg = {};
+		msg.type = "msg-totalInfo";
+		msg.totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo;
+		chrome.runtime.sendMessage(msg);
+		
+//		bAllowNextPage = true;
+//		intInterval=window.setInterval("checkGetDataDlAndNextPage()",2000);
 	} else if (request.type == "download-nextPageIndex") {
-//		alert(1);
 		if(request.pageIndex<needDownloadList.length&&bAllowDl){
-//			window.opener=null;window.close();
 			download(request.pageIndex);
 		}else{//wenti
 			if(!request.pageIndex<needDownloadList.length){
@@ -216,6 +227,7 @@ function getCurrentPageData(){
 	if(bAllowNextPage){	
 		var msg = {};
 				msg.type = "wolf-catch-pagedata";
+				//当前在第几页
 				var currentPageNo =$("#resultcontent").find("table").eq(0).find("li.active").text()
 				var data = {
 					records : [],
