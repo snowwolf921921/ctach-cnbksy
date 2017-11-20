@@ -105,7 +105,6 @@ function catchStop(request, sender, sendRequest) {
 	}else{
 		return;
 	}
-	
 };
 chrome.runtime.onMessage.addListener(catchStop);
 function removeHTMLTag(str) {
