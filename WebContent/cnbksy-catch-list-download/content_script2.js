@@ -7,59 +7,16 @@ var needDownloadList=[];
 //html&css 相关变量 与页面相关信息
 var tagTotalItemsAmount="#queryCount";
 var tagItemsAmountPerPage="#srPageCount";
+var tagCurrentPageIndex="#resultcontent table:eq(0) li.active";
+//$("#resultcontent table:eq(0) li.active").text()
 
-
-function haveNextPage(){
-	//needchange
-	if($("#resultcontent").find("table").eq(0).find("li").last().find("a").hasClass("next")){
-		return true;
-	}else{
-		return false;
-	}
-};
-function finishLoad(){
-	return !($(".xubox_msg,.xubox_text").text()=="正在检索中...");
-}
-function nextPage() {
-	if ( bAllowNextPage == true) {
-		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
-	} 
-}
-
-function  checkGetDataDlAndNextPage(){
-	if (finishLoad()){
-		getCurrentPageData();
-		
-		if(!haveNextPage()){
-			//没有下页，但是可能仍在下载，只停止抓取，所以不停止下载，让消息进程去停止下载
-			stopCatch();
-		}else if(bAllowNextPage){
-			//可以下页的情况
-			nextPage();
-		}else{
-			//有下一页不容许，下页的请，可能是在下载，只停止抓取，所以不停止下载，让消息进程去停止下载
-			stopCatch();
-		}
-	}
-}
-
-function stopCatch(){
-	bAllowNextPage = false;
-	window.clearInterval(intInterval);
-}
-function stopCatchAndDl(){
-	bAllowNextPage = false;
-	bAllowDl = false;
-//	window.stop();
-	window.clearInterval(intInterval);
-}
 function catchStop(request, sender, sendRequest) {
 //	alert(2);
 	if (request.type == "wolf-catch-stop") {
 		stopCatchAndDl();
 	} else if (request.type == "msg-catch&downloadThisItem-withTotalInfo") {
 //		取得itemIndex，catch一条并下载，
-		catchAndDownloadOneItem(request.totalInfoAndCurrentDownloadInfo);
+		checkCPageThenCatchAndDownloadOneItem(request.totalInfoAndCurrentDownloadInfo);
 	} else if (request.type == "wolf-catch-start") {
 		//获取总体信息，传到bg存储，以这些信息为循环信息
 		var totalInfoAndCurrentDownloadInfo={
@@ -69,17 +26,14 @@ function catchStop(request, sender, sendRequest) {
 				currentDPageIndex:0,  //1开始
 				currentDItemIndexInTotal:0,//1开始
 //				currentDItemIndexInPage:0,//1开始
-				
 		};
 		totalInfoAndCurrentDownloadInfo.totalItemsAmount=Number($(tagTotalItemsAmount).text());
 //		totalCatchjobInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagTotalItemsAmount));
 		totalInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagItemsAmountPerPage).val());
-		
 		var msg = {};
 		msg.type = "msg-totalInfo";
 		msg.totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo;
 		chrome.runtime.sendMessage(msg);
-		
 //		bAllowNextPage = true;
 //		intInterval=window.setInterval("checkGetDataDlAndNextPage()",2000);
 	} else if (request.type == "download-nextPageIndex") {
@@ -107,6 +61,34 @@ function catchStop(request, sender, sendRequest) {
 	}
 };
 chrome.runtime.onMessage.addListener(catchStop);
+function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
+//	check current page index ==totalInfoAndCurrentDownloadInfo.pageIndex
+	totalInfoAndCurrentDownloadInfo.currentDPageIndex= tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal.itemsAmountPerPage);
+	if(Number($(tagCurrentPageIndex))==totalInfoAndCurrentDownloadInfo.currentDPageIndex){
+		catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo)
+	}else{
+		通知bg 记录，并翻页
+//		放到bg 下载后执行，下-页 间隔调用本过程 intInterval=window.setInterval("catchAndDownloadOneItem()",2000);
+		//考虑翻页不成功情况？通知bg？记录如较长时间没有到下个item，通知cs重新下载，并记录问题
+	}	
+}
+function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
+	//计算item在当页第几项
+	var currentDItemIndexInPage=totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal%totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal.itemsAmountPerPage;
+	//找到这项并catch
+	//i
+	//下面与css相关
+	var trOne=$("table[type-id='1'] .resultRow").eq(currentDItemIndexInPage)[0];
+}
+function tCaltulatePageIndex(itemIndex,amountPerPage){
+	if (amountPerPage!=0){
+		return Math.ceil(itemIndex/amountPerPage);
+	}else{
+		return 0;
+	}
+}
+
+
 function removeHTMLTag(str) {
 	str = str	; //去除HTML tag
 	str = str.replace(/[ | ]*\n/g, '\n'); //去除行尾空白
@@ -258,3 +240,48 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 		chrome.pageAction.show(tabId);
 	}
 };	
+
+function haveNextPage(){
+	//needchange
+	if($("#resultcontent").find("table").eq(0).find("li").last().find("a").hasClass("next")){
+		return true;
+	}else{
+		return false;
+	}
+};
+function finishLoad(){
+	return !($(".xubox_msg,.xubox_text").text()=="正在检索中...");
+}
+function nextPage() {
+	if ( bAllowNextPage == true) {
+		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
+	} 
+}
+
+function  checkGetDataDlAndNextPage(){
+	if (finishLoad()){
+		getCurrentPageData();
+		
+		if(!haveNextPage()){
+			//没有下页，但是可能仍在下载，只停止抓取，所以不停止下载，让消息进程去停止下载
+			stopCatch();
+		}else if(bAllowNextPage){
+			//可以下页的情况
+			nextPage();
+		}else{
+			//有下一页不容许，下页的请，可能是在下载，只停止抓取，所以不停止下载，让消息进程去停止下载
+			stopCatch();
+		}
+	}
+}
+
+function stopCatch(){
+	bAllowNextPage = false;
+	window.clearInterval(intInterval);
+}
+function stopCatchAndDl(){
+	bAllowNextPage = false;
+	bAllowDl = false;
+//	window.stop();
+	window.clearInterval(intInterval);
+}
