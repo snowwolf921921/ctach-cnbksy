@@ -1,21 +1,25 @@
-﻿var totalCatchjobInfoAndCurrentDownloadInfo = {
+﻿//需要整理无用语句
+var totalCatchjobInfoAndCurrentDownloadInfo = {
 	totalItemsAmount : 0,
 	totalPageAmount : 0,
 	currentDPageIndex : 0, // 1开始
 	currentDItemIndexInTotal : 0,// 1开始
 //	currentDItemIndexInPage : 0,// 1开始
 };
+/*
 currentDownloadInfo2.pageNo = needDownloadList[currentDownloadPageIndex].pageNo;
 currentDownloadInfo2.totalNo = needDownloadList[currentDownloadPageIndex].totalNo;
 currentDownloadInfo2.title = needDownloadList[currentDownloadPageIndex].title;
 currentDownloadInfo2.pageIndex = currentDownloadPageIndex;
-
+*/
 var currentDownloadInfo2 = {};
 var totalData = {
 	jsonTotalDatas : [],
 	downloadStatus : "无",
 	catchStatus : "无"
 };
+
+var intIntervalNextPage;
 totalData.error = "加载中...";
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
@@ -38,19 +42,31 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal=1;
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInPage=1;
 		//通知cs下载第一条；
-		var msgFirst={};
-		msgFirst.type="msg-catch&downloadThisItem-withTotalInfo";
-		msgFirst.type=totalInfoAndCurrentDownloadInfo;
-		chrome.tabs.query({
-			// active : true,
-			currentWindow : true
-		}, function(tabs) {
-			chrome.tabs.sendMessage(tabs[0].id, msgFirst, function(response) {
-				console.log(response.farewell);
-			});
-		});
+		sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+	}else if(request.type == "askCS-downloadSameItem-afterAWhile"){
+//		放到bg 下载后执行，下-页 间隔调用本过程
+		// intInterval=window.setInterval("catchAndDownloadOneItem()",2000);
+				// 考虑翻页不成功情况？通知bg？记录如较长时间没有到下个item，通知cs重新下载，并记录问题;
+		 intIntervalNextPage=window.setInterval("sendMsgToCSRestartFromNextPage()",2000);
 	}
 });
+function sendMsgToCSRestartFromNextPage() {
+	sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+	window.clearInterval(intIntervalNextPage);
+}
+function sendMsgToCS(msgType,data) {
+	var msg = {};
+	msg.type = msgType;
+	msg.date=data;
+	chrome.tabs.query({
+		// active : true,
+		currentWindow : true
+	}, function(tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
+//			console.log(response.farewell);
+		});
+	});
+};
 function bStop() {
 	var msg3 = {};
 	msg3.type = "wolf-catch-stop";
@@ -59,7 +75,7 @@ function bStop() {
 		currentWindow : true
 	}, function(tabs) {
 		chrome.tabs.sendMessage(tabs[0].id, msg3, function(response) {
-			console.log(response.farewell);
+//			console.log(response.farewell);
 		});
 	});
 };
@@ -71,7 +87,7 @@ function bStart() {
 		currentWindow : true
 	}, function(tabs) {
 		chrome.tabs.sendMessage(tabs[0].id, msg3, function(response) {
-			console.log(response.farewell);
+//			console.log(response.farewell);
 		});
 	});
 };
