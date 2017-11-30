@@ -23,8 +23,8 @@ function catchStop(request, sender, sendRequest) {
 				totalItemsAmount : 0,
 				totalPagesAmount : 0 ,
 				itemsAmountPerPage:0,
-				currentDPageIndex:0,  // 1开始
-				currentDItemIndexInTotal:0,// 1开始
+				currentDPageIndex:1,  // 1开始
+				currentDItemIndexInTotal:1,// 1开始
 // currentDItemIndexInPage:0,//1开始
 		};
 		totalInfoAndCurrentDownloadInfo.totalItemsAmount=Number($(tagTotalItemsAmount).text());
@@ -32,7 +32,7 @@ function catchStop(request, sender, sendRequest) {
 		totalInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagItemsAmountPerPage).val());
 		var msg = {};
 		msg.type = "msg-totalInfo";
-		msg.totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo;
+		msg.data=totalInfoAndCurrentDownloadInfo;
 		chrome.runtime.sendMessage(msg);
 // bAllowNextPage = true;
 // intInterval=window.setInterval("checkGetDataDlAndNextPage()",2000);
@@ -64,7 +64,7 @@ function catchStop(request, sender, sendRequest) {
 chrome.runtime.onMessage.addListener(catchStop);
 function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
 // check current page index ==totalInfoAndCurrentDownloadInfo.pageIndex
-	totalInfoAndCurrentDownloadInfo.currentDPageIndex= tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal.itemsAmountPerPage);
+	totalInfoAndCurrentDownloadInfo.currentDPageIndex= tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo.itemsAmountPerPage);
 	if(Number($(tagCurrentPageIndex))==totalInfoAndCurrentDownloadInfo.currentDPageIndex){
 		catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo)
 	}else{

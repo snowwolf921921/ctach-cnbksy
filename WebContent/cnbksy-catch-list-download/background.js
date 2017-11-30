@@ -1,10 +1,10 @@
 ﻿//需要整理无用语句
-var totalCatchjobInfoAndCurrentDownloadInfo = {
+var totalInfoAndCurrentDownloadInfo = {
 	totalItemsAmount : 0,
 	totalPageAmount : 0,
 	currentDPageIndex : 0, // 1开始
 	currentDItemIndexInTotal : 0,// 1开始
-//	currentDItemIndexInPage : 0,// 1开始
+	currentDItemIndexInPage : 0,// 1开始
 };
 /*
 currentDownloadInfo2.pageNo = needDownloadList[currentDownloadPageIndex].pageNo;
@@ -37,7 +37,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 		currentDownloadInfo2 = request.currentDownloadInfo2;
 	} else if (request.type == "msg-totalInfo") {
 		//放入本地变量存储：
-		totalInfoAndCurrentDownloadInfo=request.totalInfoAndCurrentDownloadInfo;
+		totalInfoAndCurrentDownloadInfo=request.data;
 		totalInfoAndCurrentDownloadInfo.currentDPageIndex=1;
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal=1;
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInPage=1;
