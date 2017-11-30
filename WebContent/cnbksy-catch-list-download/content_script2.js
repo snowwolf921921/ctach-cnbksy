@@ -1,4 +1,4 @@
-﻿﻿var bAllowNextPage = true;
+﻿﻿﻿var bAllowNextPage = true;
 var bAllowDl = true;
 var waitingDownload=false;
 var intInterval;
@@ -16,7 +16,15 @@ function catchStop(request, sender, sendRequest) {
 		stopCatchAndDl();
 	} else if (request.type == "msg-catch&downloadThisItem-withTotalInfo") {
 // 取得itemIndex，catch一条并下载，
-		checkCPageThenCatchAndDownloadOneItem(request.data);
+		var totalInfoAndCurrentDownloadInfo = {
+				totalItemsAmount : 0,
+				totalPageAmount : 0,
+				currentDPageIndex : 0, // 1开始
+				currentDItemIndexInTotal : 0,// 1开始
+				currentDItemIndexInPage : 0,// 1开始
+			};
+		totalInfoAndCurrentDownloadInfo=request.data;
+		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo);
 	} else if (request.type == "wolf-catch-start") {
 		// 获取总体信息，传到bg存储，以这些信息为循环信息
 		var totalInfoAndCurrentDownloadInfo={

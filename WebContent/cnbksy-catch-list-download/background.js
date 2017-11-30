@@ -1,4 +1,4 @@
-﻿//需要整理无用语句
+﻿﻿﻿//需要整理无用语句
 var totalInfoAndCurrentDownloadInfo = {
 	totalItemsAmount : 0,
 	totalPageAmount : 0,
