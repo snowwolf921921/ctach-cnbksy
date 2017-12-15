@@ -1,5 +1,5 @@
 chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
-	if(request.type=="wolf-catch-pagedata-topopup"){
+	if(request.type=="popup-displayData"){
 		getData();
 	}else if(request.type=="current-download-item-info"){
 		
