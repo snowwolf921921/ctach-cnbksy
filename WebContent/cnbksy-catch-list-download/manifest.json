@@ -9,7 +9,7 @@
 		"default_title": "cnblogs.com article information", /* shown in tooltip*/
 		"default_popup": "popup.html"
 	},
-	"permissions" : ["http://*.cnbksy.com.cn/*","tabs","downloads","webNavigation"],//"permissions" : ["tabs","http://*.cnbksy.com/*","downloads"],
+	"permissions" : ["http://*.cnbksy.com.cn/*","tabs","downloads","webNavigation","webRequest"],//"permissions" : ["tabs","http://*.cnbksy.com/*","downloads"],
 	"content_scripts":[{
 		"matches":["http://*.cnbksy.com.cn/*"],//"matches":["http://*.cnbksy.com/*"],	
 		"all_frames": true,
