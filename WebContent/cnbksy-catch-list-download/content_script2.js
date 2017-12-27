@@ -119,6 +119,7 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
 //	data.pageDispalyText +=Number(totalNo)+"."+row.text;
 	var msgItemInfo = {};
 //	msgItemInfo.type = "current-download-item-info-waitdownload";
+	
 	totalInfoAndCurrentDownloadInfo.itemTrInfo = itemTrInfo.text;
 //	msgItemInfo.data=totalInfoAndCurrentDownloadInfo;
 //	chrome.runtime.sendMessage(msgItemInfo);
