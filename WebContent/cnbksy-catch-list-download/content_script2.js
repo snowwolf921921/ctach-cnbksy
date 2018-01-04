@@ -88,10 +88,11 @@ function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
 	}else{
 //		通知bg 记录，并翻页
 		var msgDownload = {};
-		msgDownload.type = "askCS-downloadSameItem-afterAWhile";
-		msgDownload.totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo;
-		chrome.runtime.sendMessage(msgDownload);
+//		msgDownload.type = "askCS-downloadSameItem-afterAWhile";
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
+//		msgDownload.totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo;
+//		chrome.runtime.sendMessage(msgDownload);
+		tSendMessage("askCS-downloadSameItem-afterAWhile",totalInfoAndCurrentDownloadInfo);
 //		intInterval=window.setInterval("checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo)",2000);
 		tNextPage();
 //		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo);
