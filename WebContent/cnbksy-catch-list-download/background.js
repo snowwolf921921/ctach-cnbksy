@@ -105,6 +105,7 @@ function bStopbackup() {
 };
 function bStart() {
 	nextPageEnableFlag = true;
+	//再次开始还有问题？？？
 	var msg3 = {};
 	msg3.type = "wolf-catch-start";
 	chrome.tabs.query({
