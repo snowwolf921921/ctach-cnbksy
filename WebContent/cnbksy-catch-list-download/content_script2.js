@@ -16,22 +16,21 @@ var totalInfoAndCurrentDownloadInfo = {
 		currentDItemIndexInTotal : 0,// 1开始
 		currentDItemIndexInPage : 0,// 1开始
 	};
-
 function catchStop(request, sender, sendRequest) {
 // 
 	if (request.type == "wolf-catch-stop") {
 		stopCatchAndDl();
 	} else if (request.type == "msg-catch&downloadThisItem-withTotalInfo") {
 // 取得itemIndex，catch一条并下载，
-		var totalInfoAndCurrentDownloadInfo = {
-				totalItemsAmount : 0,
-				totalPageAmount : 0,
-				currentDPageIndex : 0, // 1开始
-				currentDItemIndexInTotal : 0,// 1开始
-				currentDItemIndexInPage : 0,// 1开始
+		var totalInfoAndCurrentDownloadInfo2 = {
+//				totalItemsAmount : 0,
+//				totalPageAmount : 0,
+//				currentDPageIndex : 0, // 1开始
+//				currentDItemIndexInTotal : 0,// 1开始
+//				currentDItemIndexInPage : 0,// 1开始
 			};
-		totalInfoAndCurrentDownloadInfo=request.data;
-		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo);
+		totalInfoAndCurrentDownloadInfo2=request.data;
+		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2);
 	} else if (request.type == "wolf-catch-start") {
 		// 获取总体信息，传到bg存储，以这些信息为循环信息
 		var totalInfoAndCurrentDownloadInfo={
@@ -77,22 +76,23 @@ function catchStop(request, sender, sendRequest) {
 	}
 };
 chrome.runtime.onMessage.addListener(catchStop);
-//****************难道需要把totalInfoAndCurrentDownloadInfo改成全局变量
-function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
+//****************把totalInfoAndCurrentDownloadInfo改成全局变量?需要仔细检查
+function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 // check current page index ==totalInfoAndCurrentDownloadInfo.pageIndex
-	totalInfoAndCurrentDownloadInfo.currentDPageIndex= tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo.itemsAmountPerPage);
+//	totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo2;
+	totalInfoAndCurrentDownloadInfo2.currentDPageIndex= tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo2.itemsAmountPerPage);
 	//
-	if(Number($(tagCurrentPageIndex).text())==totalInfoAndCurrentDownloadInfo.currentDPageIndex){
-		window.clearInterval(intInterval);
-		catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo)
+	if(Number($(tagCurrentPageIndex).text())==totalInfoAndCurrentDownloadInfo2.currentDPageIndex){
+//		window.clearInterval(intInterval);
+		catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2)
 	}else{
 //		通知bg 记录，并翻页
 		var msgDownload = {};
 //		msgDownload.type = "askCS-downloadSameItem-afterAWhile";
-		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
+//		totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal++;
 //		msgDownload.totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo;
 //		chrome.runtime.sendMessage(msgDownload);
-		tSendMessage("askCS-downloadSameItem-afterAWhile",totalInfoAndCurrentDownloadInfo);
+		tSendMessage("askCS-downloadSameItem-afterAWhile",totalInfoAndCurrentDownloadInfo2);
 //		intInterval=window.setInterval("checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo)",2000);
 		tNextPage();
 //		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo);
@@ -101,9 +101,11 @@ function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
 		// 考虑翻页不成功情况？通知bg？记录如较长时间没有到下个item，通知cs重新下载，并记录问题;
 	}	
 }
-function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
-	// 计算item在当页第几项
-	var currentDItemIndexInPage=totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal%totalInfoAndCurrentDownloadInfo.itemsAmountPerPage;
+function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
+	// 计算item在当页第几项，应该和计算第几页currentDPageIndex放到一起，是否放到bg中？
+	//计数从1开始，页面元素索引从0开始
+	var currentDItemIndexInPage=(totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal-1)%totalInfoAndCurrentDownloadInfo2.itemsAmountPerPage;
+//	var currentDItemIndexInPage=totalInfoAndCurrentDownloadInfo2.currentDPageIndex
 	// 找到这项并catch
 	// i
 	// 下面与css相关
@@ -118,19 +120,20 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo){
 		+";\n";// 加；号和换行
 //	totalNo=(row.pageNo-1)*currentPageCount+Number(row.no)+1;
 //	data.pageDispalyText +=Number(totalNo)+"."+row.text;
-	var msgItemInfo = {};
 //	msgItemInfo.type = "current-download-item-info-waitdownload";
-	
-	totalInfoAndCurrentDownloadInfo.itemTrInfo = itemTrInfo.text;
+	itemTrInfo.text="currentDPageIndex:"+totalInfoAndCurrentDownloadInfo2.currentDPageIndex
+					+";currentDItemIndexInTotal:"+totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal
+					+";currentDItemIndexInPage:"+currentDItemIndexInPage+itemTrInfo.text;
+	totalInfoAndCurrentDownloadInfo2.itemTrInfo = itemTrInfo.text;
 //	msgItemInfo.data=totalInfoAndCurrentDownloadInfo;
 //	chrome.runtime.sendMessage(msgItemInfo);
 	var images=$("img[src='/public/portal/image/download.gif']");
 	if ($(trOne).find(images).length>0){
 		//download item   需要进一步在学校调试和修改   msg 接收端还有没有写
-		tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo);
+		tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo2);
 //		click($(trOne).find(images).parent()[0]);
 	}else{
-		tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo);
+		tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo2);
 	}
 	
 }

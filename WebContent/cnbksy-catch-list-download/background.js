@@ -46,6 +46,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 	} else if (request.type == "currentItemInfo-waitdownload") {
 		totalInfoAndCurrentDownloadInfo = request.data;
 		totalData.displayData += totalInfoAndCurrentDownloadInfo.itemTrInfo;
+		//只管加一的操作，其他的逻辑暂时放到cs中。
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
 		sendMsgToPopup("popup-displayData");
 		sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
@@ -61,8 +62,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 		}
 	}
 });
-
-
 
 function test() {
 //function sendMsgToCSRestartFromNextPage() {
