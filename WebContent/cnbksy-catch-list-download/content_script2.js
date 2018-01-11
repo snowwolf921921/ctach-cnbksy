@@ -21,17 +21,12 @@ function catchStop(request, sender, sendRequest) {
 	if (request.type == "wolf-catch-stop") {
 		stopCatchAndDl();
 	} else if (request.type == "msg-catch&downloadThisItem-withTotalInfo") {
-// 取得itemIndex，catch一条并下载，
+		// 取得itemIndex，catch一条并下载，
 		var totalInfoAndCurrentDownloadInfo2 = {
-//				totalItemsAmount : 0,
-//				totalPageAmount : 0,
-//				currentDPageIndex : 0, // 1开始
-//				currentDItemIndexInTotal : 0,// 1开始
-//				currentDItemIndexInPage : 0,// 1开始
 			};
 		totalInfoAndCurrentDownloadInfo2=request.data;
 		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2);
-	} else if (request.type == "wolf-catch-start") {
+	} else if (request.type == "firstStart") {
 		// 获取总体信息，传到bg存储，以这些信息为循环信息
 		var totalInfoAndCurrentDownloadInfo={
 				totalItemsAmount : 0,
@@ -45,11 +40,9 @@ function catchStop(request, sender, sendRequest) {
 		// totalCatchjobInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagTotalItemsAmount));
 		totalInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagItemsAmountPerPage).val());
 		var msg = {};
-		msg.type = "msg-totalInfo";
+		msg.type = "totalInfo";
 		msg.data=totalInfoAndCurrentDownloadInfo;
 		chrome.runtime.sendMessage(msg);
-// bAllowNextPage = true;
-// intInterval=window.setInterval("checkGetDataDlAndNextPage()",2000);
 	} else if (request.type == "download-nextPageIndex") {
 		/*if(request.pageIndex<needDownloadList.length&&bAllowDl){
 			download(request.pageIndex);

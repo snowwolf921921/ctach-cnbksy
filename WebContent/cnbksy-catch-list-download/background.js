@@ -26,7 +26,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 				.concat(request.data.records);
 		totalData.displayData += request.data.pageDispalyText;
 		sendMsgToPopup("popup-displayData");
-	} else if (request.type == "msg-totalInfo") {
+	} else if (request.type == "totalInfo") {
 		//第一次接收，放入本地变量存储：
 		totalInfoAndCurrentDownloadInfo=request.data;
 		totalInfoAndCurrentDownloadInfo.currentDPageIndex=1;
@@ -106,7 +106,7 @@ function bStart() {
 	nextPageEnableFlag = true;
 	//再次开始还有问题？？？
 	var msg3 = {};
-	msg3.type = "wolf-catch-start";
+	msg3.type = "firstStart";
 	chrome.tabs.query({
 		active : true,
 		currentWindow : true
