@@ -121,9 +121,12 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 //	totalNo=(row.pageNo-1)*currentPageCount+Number(row.no)+1;
 //	data.pageDispalyText +=Number(totalNo)+"."+row.text;
 //	msgItemInfo.type = "current-download-item-info-waitdownload";
-	itemTrInfo.text="currentDPageIndex:"+totalInfoAndCurrentDownloadInfo2.currentDPageIndex
+	/*itemTrInfo.text="currentDPageIndex:"+totalInfoAndCurrentDownloadInfo2.currentDPageIndex
 					+";currentDItemIndexInTotal:"+totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal
-					+";currentDItemIndexInPage:"+currentDItemIndexInPage+itemTrInfo.text;
+					+";currentDItemIndexInPage:"+currentDItemIndexInPage+itemTrInfo.text;*/
+	itemTrInfo.text="p:"+totalInfoAndCurrentDownloadInfo2.currentDPageIndex
+	+";n:"+totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal
+	+";i:"+currentDItemIndexInPage+itemTrInfo.text;
 	totalInfoAndCurrentDownloadInfo2.itemTrInfo = itemTrInfo.text;
 //	msgItemInfo.data=totalInfoAndCurrentDownloadInfo;
 //	chrome.runtime.sendMessage(msgItemInfo);
@@ -185,66 +188,7 @@ function clickDownloadYesOrWait(){
 		return;
 	}
 }
-//will download
-function getTableDataAndDl(currentPageNo){
-	var rowEmpty=false
-	data = {
-			records : [],
-			pageDispalyText : '',
-			rowEmpty:false	
-		};
-	var jStop=0;
-	var currentPageCount=Number($("#srPageCount").val());
-	waitingDownload=false;
-	needDownloadList=[];
-	var totalNo=0;
-	var title1="";
-	var title2="";
-	// 考虑到最后一页的情况 增加 $(".resultRow").length<currentPageCount?
-	// $(".resultRow").length:currentPageCount
-	var currentPageRowAccount=$("table[type-id='1']").find(".resultRow").length<currentPageCount?$("table[type-id='1']").find(".resultRow").length:currentPageCount;
-	for(var i=0;i<currentPageRowAccount;i++){
-		var row = {};
-		row.pageNo = currentPageNo;
-		row.no=i;
-		// 第一tab，正文
-		trOne=$("table[type-id='1']").find(".resultRow").eq(i)[0];
-		title1=$(trOne).find("td").eq(1).children("a").eq(0)[0].innerText;
-		title2=$(trOne).find("td").eq(1).children("a").length>1?$(trOne).find("td").eq(1).children("a").eq(1)[0].innerText:"";
-		row.text=title1+"|"+title2+"|"
-					+getFormatedAndAuthorAndBookinfo($(".resultRow").eq(i).find("td").eq(1).find("div"))
-					+";\n";// 加；号和换行
-		data.records.push(row);
-		totalNo=(row.pageNo-1)*currentPageCount+Number(row.no)+1;
-// data.pageDispalyText +=row.pageNo+"."+row.no+"."+(totalNo+1)+"."+row.text;
-		data.pageDispalyText +=Number(totalNo)+"."+row.text;
-		var images=$("img[src='/public/portal/image/download.gif']");
-		if ($(trOne).find(images).length>0){
-// click($(trOne).find(images).parent()[0]);
-			// 保存待下载信息
-			var currentDownloadInfo={};
-			// 保存下载项的 野内编号，总编号，题目，
-			currentDownloadInfo.pageNo=i;
-			currentDownloadInfo.totalNo=totalNo;
-			var as=$("a");
-			currentDownloadInfo.title=$(trOne).find(as).eq(0).text()
-			needDownloadList.push(currentDownloadInfo);
-			waitingDownload=true;
-// clickDownloadYesOrWait();
-		}
-	}
-	var currentDownloadPageIndex=-1;
-	if(waitingDownload){
-		stopCatch();
-		bAllowDl=true;
-		currentDownloadPageIndex=0;
-		download(currentDownloadPageIndex);
-	}
-/*
- * pageNo pageIndex totalNo 0 1 2 * 0 13 3 4 * 1 15
- */
-	return data;
-};
+
 function getFormatedAndAuthorAndBookinfo(dObject){
 	divObject=$(dObject);
 // var title=divObject.find("a").eq(0)[0].innerText;
