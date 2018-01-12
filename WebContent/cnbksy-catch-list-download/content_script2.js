@@ -221,6 +221,14 @@ function click(el) {
 	el.dispatchEvent(e);
 };
 // 问题处
+
+
+function nextPage() {
+	if ( bAllowNextPage == true) {
+		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
+	} 
+}
+/*
 function getCurrentPageData(){
 	if(bAllowNextPage){	
 		var msg = {};
@@ -245,19 +253,20 @@ function getDomainFromUrl(url){
 	var host = "null";
 	if(typeof url == "undefined" || null == url)
 		url = window.location.href;
-	var regex = /.*\:\/\/([^\/]*).*/;
 	var match = url.match(regex);
 	if(typeof match != "undefined" && null != match)
 		host = match[1];
 	return host;
 }
 
+function finishLoad(){
+	return !($(".xubox_msg,.xubox_text").text()=="正在检索中...");
+}
 function checkForValidUrl(tabId, changeInfo, tab) {
 	if(toolGetDomainFromUrl(tab.url).toLowerCase()=="www.cnblogs.com"){
 		chrome.pageAction.show(tabId);
 	}
 };	
-
 function haveNextPage(){
 	// needchange
 	if($("#resultcontent").find("table").eq(0).find("li").last().find("a").hasClass("next")){
@@ -266,15 +275,6 @@ function haveNextPage(){
 		return false;
 	}
 };
-function finishLoad(){
-	return !($(".xubox_msg,.xubox_text").text()=="正在检索中...");
-}
-function nextPage() {
-	if ( bAllowNextPage == true) {
-		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
-	} 
-}
-
 function  checkGetDataDlAndNextPage(){
 	if (finishLoad()){
 		getCurrentPageData();
@@ -301,4 +301,4 @@ function stopCatchAndDl(){
 	bAllowDl = false;
 // window.stop();
 	window.clearInterval(intInterval);
-}
+}*/
