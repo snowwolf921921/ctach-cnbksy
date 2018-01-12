@@ -38,12 +38,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 	} else if (request.type == "currentItemInfo-downloadNextItem") {
 		totalInfoAndCurrentDownloadInfo = request.data;
 		totalData.displayData += totalInfoAndCurrentDownloadInfo.itemTrInfo;
+		sendMsgToPopup("popup-displayData");
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
-		if(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal<=totalInfoAndCurrentDownloadInfo.totalItemsAmount){
-			sendMsgToPopup("popup-displayData");
-			sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+		var bFlagIndexNeedNextPage=tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo.itemsAmountPerPage)>totalInfoAndCurrentDownloadInfo.currentDPageIndex;
+//		alert(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal+","+totalInfoAndCurrentDownloadInfo.itemsAmountPerPage+","+totalInfoAndCurrentDownloadInfo.currentDPageIndex);
+		if((totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal<totalInfoAndCurrentDownloadInfo.totalItemsAmount)){
+			if(!(!nextPageEnableFlag&&bFlagIndexNeedNextPage)){
+				sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+			}	
 		}
 	} else if (request.type == "currentItemInfo-waitdownload") {
+		//待确定
 		totalInfoAndCurrentDownloadInfo = request.data;
 		totalData.displayData += totalInfoAndCurrentDownloadInfo.itemTrInfo;
 		//只管加一的操作，其他的逻辑暂时放到cs中。
@@ -150,6 +155,17 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 			+ item.filename + ";" + "将要下载: " + msgDlNext.pageIndex
 
 });
+
+
+function tCaltulatePageIndex(itemIndex,amountPerPage){
+	if (amountPerPage!=0){
+		return Math.ceil(itemIndex/amountPerPage);
+	}else{
+		return 0;
+	}
+}
+
+
 function checkForValidUrl(tabId, changeInfo, tab) {
 	if (toolGetDomainFromUrl(tab.url).toLowerCase() == "http://shenbao.egreenapple.com/") {
 		chrome.pageAction.show(tabId);

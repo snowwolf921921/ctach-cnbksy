@@ -12,6 +12,7 @@ var tagCurrentPageIndex="#resultcontent table:eq(0) li.active";
 var totalInfoAndCurrentDownloadInfo = {
 		totalItemsAmount : 0,
 		totalPageAmount : 0,
+		itemsAmountPerPage:0,
 		currentDPageIndex : 0, // 1开始
 		currentDItemIndexInTotal : 0,// 1开始
 		currentDItemIndexInPage : 0,// 1开始
@@ -34,7 +35,7 @@ function catchStop(request, sender, sendRequest) {
 				itemsAmountPerPage:0,
 				currentDPageIndex:1,  // 1开始
 				currentDItemIndexInTotal:1,// 1开始
-// currentDItemIndexInPage:0,//1开始
+				currentDItemIndexInPage:0,//1开始
 		};
 		totalInfoAndCurrentDownloadInfo.totalItemsAmount=Number($(tagTotalItemsAmount).text());
 		// totalCatchjobInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagTotalItemsAmount));
