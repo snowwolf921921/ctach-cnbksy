@@ -25,7 +25,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 		totalData.jsonTotalDatas = totalData.jsonTotalDatas
 				.concat(request.data.records);
 		totalData.displayData += request.data.pageDispalyText;
-		sendMsgToPopup("popup-displayData");
+		tSendMsgToPopup("popup-displayData");
 	} else if (request.type == "totalInfo") {
 		//第一次接收，放入本地变量存储：
 		totalInfoAndCurrentDownloadInfo=request.data;
@@ -34,17 +34,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInPage=1;
 		//totalItemsAmount 已经在cs页中放入了
 		//通知cs下载第一条；
-		sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+		tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
 	} else if (request.type == "currentItemInfo-downloadNextItem") {
 		totalInfoAndCurrentDownloadInfo = request.data;
 		totalData.displayData += totalInfoAndCurrentDownloadInfo.itemTrInfo;
-		sendMsgToPopup("popup-displayData");
+		tSendMsgToPopup("popup-displayData");
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
 		var bFlagIndexNeedNextPage=tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo.itemsAmountPerPage)>totalInfoAndCurrentDownloadInfo.currentDPageIndex;
 //		alert(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal+","+totalInfoAndCurrentDownloadInfo.itemsAmountPerPage+","+totalInfoAndCurrentDownloadInfo.currentDPageIndex);
-		if((totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal<totalInfoAndCurrentDownloadInfo.totalItemsAmount)){
+		if((totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal<=totalInfoAndCurrentDownloadInfo.totalItemsAmount)){
 			if(!(!nextPageEnableFlag&&bFlagIndexNeedNextPage)){
-				sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+				tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
 			}	
 		}
 	} else if (request.type == "currentItemInfo-waitdownload") {
@@ -53,61 +53,28 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 		totalData.displayData += totalInfoAndCurrentDownloadInfo.itemTrInfo;
 		//只管加一的操作，其他的逻辑暂时放到cs中。
 		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
-		sendMsgToPopup("popup-displayData");
-		sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+		tSendMsgToPopup("popup-displayData");
+		tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
 		
 	}else if(request.type == "askCS-downloadSameItem-afterAWhile"){
 		if(nextPageEnableFlag){
 			totalInfoAndCurrentDownloadInfo = request.data;
 			//setInterval定时不断执行，setTimeout只执行一次
 			var t=setTimeout(function(){
-				sendMsgToPopup("popup-displayData");
-				sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+				tSendMsgToPopup("popup-displayData");
+				tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
 			},2000)
 		}
 	}
 });
 
-function test() {
-//function sendMsgToCSRestartFromNextPage() {
-	sendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
-	window.clearInterval(intIntervalNextPage);
-}
-function sendMsgToCS(msgType,data) {
-	var msg = {};
-	msg.type = msgType;
-	msg.data=data;
-	chrome.tabs.query({
-//		 active : true,
-		currentWindow : true
-	}, function(tabs) {
-		chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
-//			console.log(response.farewell);
-		});
-	});
-};
-function sendMsgToPopup(msgType,data) {
-	var msg = {};
-	msg.type = msgType;
-	msg.data=data;
-	chrome.runtime.sendMessage(msg);
-};
 function bStop() {
 	nextPageEnableFlag=false;
 };
 function bStart() {
 	nextPageEnableFlag = true;
 	//再次开始还有问题？？？
-	var msg3 = {};
-	msg3.type = "firstStart";
-	chrome.tabs.query({
-		active : true,
-		currentWindow : true
-	}, function(tabs) {
-		chrome.tabs.sendMessage(tabs[0].id, msg3, function(response) {
-//			console.log(response.farewell);
-		});
-	});
+	tSendMsgToCS("firstStart",{});
 };
 chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 	suggest({
@@ -144,7 +111,6 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 
 });
 
-
 function tCaltulatePageIndex(itemIndex,amountPerPage){
 	if (amountPerPage!=0){
 		return Math.ceil(itemIndex/amountPerPage);
@@ -152,20 +118,22 @@ function tCaltulatePageIndex(itemIndex,amountPerPage){
 		return 0;
 	}
 }
-
-
-function checkForValidUrl(tabId, changeInfo, tab) {
-	if (toolGetDomainFromUrl(tab.url).toLowerCase() == "http://shenbao.egreenapple.com/") {
-		chrome.pageAction.show(tabId);
-	}
+function tSendMsgToCS(msgType,data) {
+	var msg = {};
+	msg.type = msgType;
+	msg.data=data;
+	chrome.tabs.query({
+//		 active : true,
+		currentWindow : true
+	}, function(tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
+//			console.log(response.farewell);
+		});
+	});
 };
-function toolGetDomainFromUrl(url) {
-	var host = "null";
-	if (typeof url == "undefined" || null == url)
-		url = window.location.href;
-	var regex = /.*\:\/\/([^\/]*).*/;
-	var match = url.match(regex);
-	if (typeof match != "undefined" && null != match)
-		host = match[1];
-	return host;
-}
+function tSendMsgToPopup(msgType,data) {
+	var msg = {};
+	msg.type = msgType;
+	msg.data=data;
+	chrome.runtime.sendMessage(msg);
+};

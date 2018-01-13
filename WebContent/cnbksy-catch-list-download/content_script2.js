@@ -18,7 +18,6 @@ var totalInfoAndCurrentDownloadInfo = {
 		currentDItemIndexInPage : 0,// 1开始
 	};
 function catchStop(request, sender, sendRequest) {
-// 
 	if (request.type == "wolf-catch-stop") {
 		stopCatchAndDl();
 	} else if (request.type == "msg-catch&downloadThisItem-withTotalInfo") {
@@ -44,27 +43,6 @@ function catchStop(request, sender, sendRequest) {
 		msg.type = "totalInfo";
 		msg.data=totalInfoAndCurrentDownloadInfo;
 		chrome.runtime.sendMessage(msg);
-	} else if (request.type == "download-nextPageIndex") {
-		/*if(request.pageIndex<needDownloadList.length&&bAllowDl){
-			download(request.pageIndex);
-		}else{// wenti
-			if(!request.pageIndex<needDownloadList.length){
-				// 已经下载完本页，需求需要进入下一页。如果还有下页，进入抓取数据并下载。
-				bAllowNextPage = true;
-				waitingDownload=false;
-				if (bAllowNextPage&&haveNextPage()){
-					bAllowDl = true;
-					nextPage();
-					intInterval=window.setInterval("checkGetDataDlAndNextPage()",2000);
-				}else{
-					stopCatchAndDl();
-				}
-			}else {
-				// if (request.pageIndex<needDownloadList.length&&!bAllowDl)
-				// 还没下载完就暂停下载的情况
-				stopCatchAndDl();
-			}
-		}*/
 	}else{
 		return;
 	}
@@ -77,21 +55,13 @@ function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2)
 	totalInfoAndCurrentDownloadInfo2.currentDPageIndex= tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo2.itemsAmountPerPage);
 	//
 	if(Number($(tagCurrentPageIndex).text())==totalInfoAndCurrentDownloadInfo2.currentDPageIndex){
-//		window.clearInterval(intInterval);
 		catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2)
 	}else{
 //		通知bg 记录，并翻页
 		var msgDownload = {};
-//		msgDownload.type = "askCS-downloadSameItem-afterAWhile";
-//		totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal++;
-//		msgDownload.totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo;
-//		chrome.runtime.sendMessage(msgDownload);
 		tSendMessage("askCS-downloadSameItem-afterAWhile",totalInfoAndCurrentDownloadInfo2);
-//		intInterval=window.setInterval("checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo)",2000);
 		tNextPage();
-//		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo);
-// 放到bg 下载后执行，下-页 间隔调用本过程
-// intInterval=window.setInterval("catchAndDownloadOneItem()",2000);
+		// 放到bg 过一段时间等cs翻完页在，bg 向cs发消息继续抓取
 		// 考虑翻页不成功情况？通知bg？记录如较长时间没有到下个item，通知cs重新下载，并记录问题;
 	}	
 }
@@ -101,11 +71,9 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 	var currentDItemIndexInPage=(totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal-1)%totalInfoAndCurrentDownloadInfo2.itemsAmountPerPage;
 //	var currentDItemIndexInPage=totalInfoAndCurrentDownloadInfo2.currentDPageIndex
 	// 找到这项并catch
-	// i
 	// 下面与css相关
 	var trOne=$("table[type-id='1'] .resultRow").eq(currentDItemIndexInPage)[0];
 	var itemTrInfo={};
-	
 	title1=$(trOne).find("td").eq(1).children("a").eq(0)[0].innerText;
 	title2=$(trOne).find("td").eq(1).children("a").length>1?$(trOne).find("td").eq(1).children("a").eq(1)[0].innerText:"";
 	
@@ -115,8 +83,7 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 //	totalNo=(row.pageNo-1)*currentPageCount+Number(row.no)+1;
 //	data.pageDispalyText +=Number(totalNo)+"."+row.text;
 //	msgItemInfo.type = "current-download-item-info-waitdownload";
-	/*itemTrInfo.text="currentDPageIndex:"+totalInfoAndCurrentDownloadInfo2.currentDPageIndex
-					+";currentDItemIndexInTotal:"+totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal
+	/*itemTrInfo.text="currentDPageIndex:"+totalInfoAndCurrentDownloadInfo2.currentDPageIndex+";currentDItemIndexInTotal:"+totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal
 					+";currentDItemIndexInPage:"+currentDItemIndexInPage+itemTrInfo.text;*/
 	itemTrInfo.text="p:"+totalInfoAndCurrentDownloadInfo2.currentDPageIndex
 	+";n:"+totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal
@@ -146,24 +113,6 @@ function tCaltulatePageIndex(itemIndex,amountPerPage){
 	}else{
 		return 0;
 	}
-}
-function tNextPage() {
-	if(tHaveNextPage()){
-		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
-	}else{
-		window.clearInterval(intInterval);
-	}
-}
-function tHaveNextPage(){
-	// needchange
-	if($("#resultcontent").find("table").eq(0).find("li").last().find("a").hasClass("next")){
-		return true;
-	}else{
-		return false;
-	}
-};
-function tStopCatchAndDl(){
-	window.clearInterval(intInterval);
 }
 
 function removeHTMLTag(str) {
@@ -222,7 +171,6 @@ function click(el) {
 };
 // 问题处
 
-
 function nextPage() {
 	if ( bAllowNextPage == true) {
 		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
@@ -267,6 +215,7 @@ function checkForValidUrl(tabId, changeInfo, tab) {
 		chrome.pageAction.show(tabId);
 	}
 };	
+
 function haveNextPage(){
 	// needchange
 	if($("#resultcontent").find("table").eq(0).find("li").last().find("a").hasClass("next")){
