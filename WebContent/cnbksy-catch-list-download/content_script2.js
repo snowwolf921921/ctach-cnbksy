@@ -171,10 +171,10 @@ function click(el) {
 };
 // 问题处
 
-function nextPage() {
-	if ( bAllowNextPage == true) {
+function tNextPage() {
+//	if ( bAllowNextPage == true) {
 		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
-	} 
+//	} 
 }
 /*
 function getCurrentPageData(){
