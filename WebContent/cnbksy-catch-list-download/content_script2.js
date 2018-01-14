@@ -9,6 +9,7 @@ var tagTotalItemsAmount="#queryCount";
 var tagItemsAmountPerPage="#srPageCount";
 var tagCurrentPageIndex="#resultcontent table:eq(0) li.active";
 // $("#resultcontent table:eq(0) li.active").text()
+//cs 里的totalInfoAndCurrentDownloadInfo变量似乎可以取消
 var totalInfoAndCurrentDownloadInfo = {
 		totalItemsAmount : 0,
 		totalPageAmount : 0,
@@ -99,7 +100,6 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 	}else{
 		tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo2);
 	}
-	
 }
 function tSendMessage(msgType,data){
 	var msg = {};

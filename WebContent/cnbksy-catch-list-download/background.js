@@ -1,4 +1,4 @@
-﻿//需要整理无用语句
+﻿//restart 需要读取全局变量
 var totalInfoAndCurrentDownloadInfo = {
 	totalItemsAmount : 0,
 	totalPageAmount : 0,
@@ -73,8 +73,11 @@ function bStop() {
 };
 function bStart() {
 	nextPageEnableFlag = true;
-	//再次开始还有问题？？？
 	tSendMsgToCS("firstStart",{});
+};
+function bReStart() {
+	nextPageEnableFlag = true;
+	tSendMsgToCS("msg-catch&downloadThisItem-withTotalInfo",totalInfoAndCurrentDownloadInfo);
 };
 chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 	suggest({
