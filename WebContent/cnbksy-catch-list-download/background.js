@@ -75,7 +75,7 @@ function bStart() {
 	nextPageEnableFlag = true;
 	tSendMsgToCS("firstStart",{});
 };
-function bReStart() {
+function bResume() {
 	nextPageEnableFlag = true;
 	tSendMsgToCS("msg-catch&downloadThisItem-withTotalInfo",totalInfoAndCurrentDownloadInfo);
 };
@@ -129,9 +129,11 @@ function tSendMsgToCS(msgType,data) {
 //		 active : true,
 		currentWindow : true
 	}, function(tabs) {
+	if(tabs.length>0){
 		chrome.tabs.sendMessage(tabs[0].id, msg, function(response) {
 //			console.log(response.farewell);
 		});
+	}	
 	});
 };
 function tSendMsgToPopup(msgType,data) {
