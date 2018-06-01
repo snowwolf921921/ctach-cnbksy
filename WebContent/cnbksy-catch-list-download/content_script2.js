@@ -94,13 +94,19 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 //	chrome.runtime.sendMessage(msgItemInfo);
 	var images=$("img[src='/public/portal/image/download.gif']");
 	if ($(trOne).find(images).length>0){
-		//download item   需要进一步在学校调试和修改   msg 接收端还有没有写
+		//download item
+//		tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo2);
 		tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo2);
-//		click($(trOne).find(images).parent()[0]);
-	}else{
+		click($(trOne).find(images).parent()[0]);
+		
+//		var t=setTimeout(tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo2),2000);
+		
+	}else{//没有下载的情况
 		tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo2);
 	}
 }
+
+
 function tSendMessage(msgType,data){
 	var msg = {};
 	msg.type=msgType;
@@ -122,15 +128,7 @@ function removeHTMLTag(str) {
 	str = str.replace(/ /ig, '');// 去掉
 	return str;
 }
-function clickDownloadYesOrWait(){
-	// 需要有暂停
-	if($(".xubox_yes,.xubox_botton2").text()!="确定下载"){
-		setTimeout("clickDownloadYesOrWait()", 2000);
-	}else{
-		click($(".xubox_yes,.xubox_botton2")[0])
-		return;
-	}
-}
+
 
 function getFormatedAndAuthorAndBookinfo(dObject){
 	divObject=$(dObject);
@@ -239,6 +237,15 @@ function  checkGetDataDlAndNextPage(){
 			stopCatch();
 		}
 	}
+	function clickDownloadYesOrWait(){
+	// 需要有暂停
+	if($(".xubox_yes,.xubox_botton2").text()!="确定下载"){
+		setTimeout("clickDownloadYesOrWait()", 2000);
+	}else{
+		click($(".xubox_yes,.xubox_botton2")[0])
+		return;
+	}
+}
 }
 
 function stopCatch(){

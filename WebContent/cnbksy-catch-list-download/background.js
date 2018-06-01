@@ -51,10 +51,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest) {
 		//待确定
 		totalInfoAndCurrentDownloadInfo = request.data;
 		totalData.displayData += totalInfoAndCurrentDownloadInfo.itemTrInfo;
-		//只管加一的操作，其他的逻辑暂时放到cs中。
-		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
+//在下载文件后2秒或其他时间触发，下载下一条，
+//		totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
 		tSendMsgToPopup("popup-displayData");
-		tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
+//		tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totalInfoAndCurrentDownloadInfo);
 		
 	}else if(request.type == "askCS-downloadSameItem-afterAWhile"){
 		if(nextPageEnableFlag){
@@ -81,38 +81,43 @@ function bResume() {
 };
 chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 	suggest({
-		filename : currentDownloadInfo2.totalNo + "-" + item.filename,
+		filename : totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal + "-" + item.filename,
 		conflict_action : 'overwrite',
 		conflictAction : 'overwrite'
 	});
-	totalData.downloadStatus = "已经下载:" + currentDownloadInfo2.totalNo + "-"
-			+ item.filename
+//	totalData.downloadStatus = "已经下载:" + totalInfoAndCurrentDownloadInfo.totalNo + "-"+ item.filename
+
+	
+	// chrome.runtime.onMessage.addListener(catchStop);
+	totalData.downloadStatus = "已经下载: " + totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal + "-"
+			+ item.filename + ";" + "将要下载: " +(totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal+1);
 	var msgDlNext = {};
 	//新改动
 	msgDlNext.type = "msg-catch&downloadThisItem-withTotalInfo";
 	totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
-	msgDlNext.totalInfoAndCurrentDownloadInfo = totalInfoAndCurrentDownloadInfo;
-	// 通知cs下载下一个
-	chrome.tabs.query({
-		// active : true,
-		currentWindow : true
-	}, function(tabs) {
-		chrome.tabs.sendMessage(tabs[0].id, msgDlNext, function(response) {
-		});
-	});
+//	tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totAlInfoAndCurrentDownloadInfo);
+	closeTabAndNext();
+//	var t=setTimeout(closeTabAndNext,800);
+	
+});
+function closeTabAndNext(){
 	chrome.tabs.query({
 		active : true,
 		currentWindow : true
 	// url:"about:blank"
 	}, function(tabs) {
 		// 删除新打开的空白页
-		chrome.tabs.remove(tabs[0].id);
+		if(tabs.length>0){
+			chrome.tabs.remove(tabs[0].id);
+			t=setTimeout(nextItemToCS,800);
+		}
 	});
-	// chrome.runtime.onMessage.addListener(catchStop);
-	totalData.downloadStatus = "已经下载: " + currentDownloadInfo2.totalNo + "-"
-			+ item.filename + ";" + "将要下载: " + msgDlNext.pageIndex
+	
+}
 
-});
+function nextItemToCS(){
+	tSendMsgToCS("msg-catch&downloadThisItem-withTotalInfo",totalInfoAndCurrentDownloadInfo)
+}
 
 function tCaltulatePageIndex(itemIndex,amountPerPage){
 	if (amountPerPage!=0){
@@ -136,6 +141,7 @@ function tSendMsgToCS(msgType,data) {
 	}	
 	});
 };
+
 function tSendMsgToPopup(msgType,data) {
 	var msg = {};
 	msg.type = msgType;
