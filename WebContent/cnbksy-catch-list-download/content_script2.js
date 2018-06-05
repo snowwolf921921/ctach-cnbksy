@@ -98,6 +98,7 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 //		tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo2);
 		tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo2);
 		click($(trOne).find(images).parent()[0]);
+		//下载完，在++，下载下一条，在监听器中实现
 		
 //		var t=setTimeout(tSendMessage("currentItemInfo-waitdownload",totalInfoAndCurrentDownloadInfo2),2000);
 		

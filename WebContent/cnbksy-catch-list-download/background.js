@@ -94,12 +94,19 @@ chrome.downloads.onDeterminingFilename.addListener(function(item, suggest) {
 	var msgDlNext = {};
 	//新改动
 	msgDlNext.type = "msg-catch&downloadThisItem-withTotalInfo";
+	
 	totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal++;
 //	tSendMsgToCS('msg-catch&downloadThisItem-withTotalInfo',totAlInfoAndCurrentDownloadInfo);
 	closeTabAndNext();
 //	var t=setTimeout(closeTabAndNext,800);
 	
 });
+chrome.commands.onCommand.addListener(function(command){
+//	console.log("commmand",command);
+	if(command =="toggle-stop-cn"){
+		bStop();
+	}
+})
 function closeTabAndNext(){
 	chrome.tabs.query({
 		active : true,
@@ -109,7 +116,9 @@ function closeTabAndNext(){
 		// 删除新打开的空白页
 		if(tabs.length>0){
 			chrome.tabs.remove(tabs[0].id);
-			t=setTimeout(nextItemToCS,800);
+			if(nextPageEnableFlag){
+				t=setTimeout(nextItemToCS,800);
+			}
 		}
 	});
 	

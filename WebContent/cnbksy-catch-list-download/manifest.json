@@ -15,6 +15,16 @@
 		"all_frames": true,
 		"js":["jquery-2.0.0.min.js", "content_script2.js"]
 	}],
+	"commands":{
+		"toggle-stop-cn":{
+			"suggested_key":{
+				"default":"Ctrl+Shift+3",
+				"mac":"Command+Shift+3"
+			},
+			"description":"stop cnbksy js",
+			"global":true
+		}
+	},
 	"manifest_version": 2
 }
 
