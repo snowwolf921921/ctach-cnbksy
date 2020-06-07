@@ -1,15 +1,37 @@
-﻿//var bAllowNextPage = true;
+﻿/*20200606 1.修改下载cnki页面，单独打开每个item，下载pdf文件，记录是否成功。
+*  2.尽量修改成通用程序，即所有网站下载都适用这个一个程序。
+*  所以首先要区分下载类型：
+*  是否逐项下载or通过整页jasn数据下载（如存包柜）；逐项下载是否需要打开新页面如（读秀下载）
+*  3.这次0606暂时修改cnki页面，逐项下载，单独打开新页面下载pdf文件。
+*  4.备忘 逐项下载的关键程序：catchAndDownloadOneItem
+*  /
+//var bAllowNextPage = true;
 var bAllowDl = true;
 var waitingDownload=false;
 var intInterval;
 var currentDownloadInfo={};
 var needDownloadList=[];
 // html&css 相关变量 与页面相关信息
+
+/*与页面相关变量*/
+//page css 当前每页显示多少项
+var currentPageCount=Number($("#id_grid_display_num a font").text()!=""?$("#id_grid_display_num a font").text():$(window.frames["iframeResult"].document).find("#id_grid_display_num a font").text());
+//page css 当前页实际有多少项
+var currentPageRowAccount=$("table.GridTableContent tr").length>0?$("table.GridTableContent tr").length:$(window.frames["iframeResult"].document).find("table.GridTableContent tr").length-1;
+//下载内容的tr的集合，jquery对象，包括标题	
+var trs=$("table.GridTableContent tr").length>0?$("table.GridTableContent tr"):$(window.frames["iframeResult"].document).find("table.GridTableContent tr");
+
+
+
 var tagTotalItemsAmount="#queryCount";
 var tagItemsAmountPerPage="#srPageCount";
 var tagCurrentPageIndex="#resultcontent table:eq(0) li.active";
 // $("#resultcontent table:eq(0) li.active").text()
 //cs 里的totalInfoAndCurrentDownloadInfo变量似乎可以取消
+
+// 新建页面需要变量
+var $divIframe;
+var $iframeEmbed;
 var totalInfoAndCurrentDownloadInfo = {
 		totalItemsAmount : 0,
 		totalPageAmount : 0,
@@ -37,12 +59,27 @@ function catchStop(request, sender, sendRequest) {
 				currentDItemIndexInTotal:1,// 1开始
 				currentDItemIndexInPage:0,//1开始
 		};
+		/*与页面相关变量*/
+//		var currentPageCount=Number($("#id_grid_display_num a font").text()!=""?$("#id_grid_display_num a font").text():$(window.frames["iframeResult"].document).find("#id_grid_display_num a font").text());
+//		var currentPageRowAccount=$("table.GridTableContent tr").length>0?$("table.GridTableContent tr").length:$(window.frames["iframeResult"].document).find("table.GridTableContent tr").length-1;
+	//下载内容的tr的集合，jquery对象，包括标题	
+		
+		var trs=$("table.GridTableContent tr").length>0?$("table.GridTableContent tr"):$(window.frames["iframeResult"].document).find("table.GridTableContent tr");
+		
+		
+
+		$("div.pagerTitleCell").eq(0).text()
 		totalInfoAndCurrentDownloadInfo.totalItemsAmount=Number($(tagTotalItemsAmount).text());
+		
+//怎么自动化的取到总数量，和每页数量？和抓取内容循环
+		
 		// totalCatchjobInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagTotalItemsAmount));
-		totalInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagItemsAmountPerPage).val());
+		totalInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($("table.GridTableContent tr").length>0?$("table.GridTableContent tr").length:$(window.frames["iframeResult"].document).find("table.GridTableContent tr").length-1);
 		var msg = {};
 		msg.type = "totalInfo";
 		msg.data=totalInfoAndCurrentDownloadInfo;
+		creatIframeAndLoadFunc();
+		$("body").append($divIframe);
 		chrome.runtime.sendMessage(msg);
 	}else{
 		return;
@@ -100,6 +137,38 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 	}else{
 		tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo2);
 	}
+}
+/*
+ * 新建iframe打开一个新的item的url，在iframe内实现下载。20200606
+ */
+function creatIframeAndLoadFunc(){
+	$divIframe = $( "<div id='divIframe' style='position:absolute;top:900px;left:100px;overflow: scroll; border: 1px solid;'></div>" );
+	$iframeEmbed = $( "<iframe id='embedIframe' border='2px' height='1000px' width='1000px' display='inline'></iframe>" );
+	$iframeEmbed.attr("src","http://book.duxiu.com/bookDetail.jsp?dxNumber=000001024326&d=6AC52643FD37FE591EF8EFCF8745F095&fenlei=070306091501")
+    $divIframe.append($iframeEmbed);
+	$("body").append($divIframe);
+	$iframeEmbed.load(function(){
+		var itemTrInfo={};
+		var t1="";
+		t1=$iframeEmbed.contents().find('.card_text dl dt').text().trim();
+		/*var t2=$iframeEmbed.contents().find('.card_text dl dd').eq(0).text().trim();
+		var t3=$iframeEmbed.contents().find('.card_text dl dd').eq(1).text().trim();
+		var t4=$iframeEmbed.contents().find('.card_text dl dd').eq(2).text().trim();*/
+		if(t1.length>0){
+			itemTrInfo.text=t1
+			$iframeEmbed.contents().find('.card_text dl dd:not(.bnt_content)').each(function(){
+				itemTrInfo.text+="|"+(removeHTMLTag($(this).text().trim()).length>0?removeHTMLTag($(this).text().trim()):"");
+			})
+			itemTrInfo.text+=";\n";
+			var cPicName=t1;
+			totalInfoAndCurrentDownloadInfo.itemTrInfo = itemTrInfo.text;
+			totalInfoAndCurrentDownloadInfo.cPicName = cPicName;
+			tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo);
+		}else{
+			//没取到标题信息，很大可能是出现了验证码
+			tSendMsgToPopup("popup-displayThisInfo",{info:"没取到标题信息，很大可能是出现了验证码"});
+		}
+	});
 }
 function tSendMessage(msgType,data){
 	var msg = {};
