@@ -144,7 +144,7 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 function creatIframeAndLoadFunc(){
 	$divIframe = $( "<div id='divIframe' style='position:absolute;top:900px;left:100px;overflow: scroll; border: 1px solid;'></div>" );
 	$iframeEmbed = $( "<iframe id='embedIframe' border='2px' height='1000px' width='1000px' display='inline'></iframe>" );
-	$iframeEmbed.attr("src","http://book.duxiu.com/bookDetail.jsp?dxNumber=000001024326&d=6AC52643FD37FE591EF8EFCF8745F095&fenlei=070306091501")
+	$iframeEmbed.attr("src","https://kns.cnki.net/kns/detail/detail.aspx?QueryID=3&CurRec=1&recid=&FileName=YSSH201801003&DbName=CJFDLAST2018&DbCode=CJFQ&yx=&pr=CJFV2018;&URLID=&bsm=QS0104;V02;")
     $divIframe.append($iframeEmbed);
 	$("body").append($divIframe);
 	$iframeEmbed.load(function(){

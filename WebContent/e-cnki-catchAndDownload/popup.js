@@ -10,12 +10,18 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 });
 function getData() {                          
 	var totalData = chrome.extension.getBackgroundPage().totalData;     
-	if(totalData.displayData.length>0){
-		$("#testarea").text(totalData.displayData);
-		$("#message").text(totalData.downloadStatus);
+	
+	if(totalData.displayData){
+		if(totalData.displayData.length>0){
+			$("#testarea").text(totalData.displayData);
+			$("#message").text(totalData.downloadStatus);
+		}else{
+			//没取到数据
+		}
 	}else{
-		//没取到数据
+		//没有取到数据
 	}
+	
 	
 }
 function initClick() {                          

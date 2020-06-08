@@ -1,4 +1,4 @@
-﻿{	"name": "a cnki catch list download",
+﻿{	"name": "a cnki2 download item open window pdf",
 	"version": "0.0.1",
 	"background": { "scripts": ["jquery-2.0.0.min.js", "background.js"] },
 	"browser_action": {
