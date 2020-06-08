@@ -1,51 +1,76 @@
 chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 	if(request.type=="popup-displayData"){
 		getData();
+	}else if(request.type=="popup-displayThisInfo"){
+		$("#message").text(request.data.info);
 	}else if(request.type=="current-download-item-info"){
-		
-		$("#message").text("正在下载"+request.currentDownloadInfo2.totalNo+"-"+request.currentDownloadInfo2.title); 
+//		$("#message").text("正在下载"+request.data.totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal+"-"+request.data.totalInfoAndCurrentDownloadInfo.itemTrInfoWithNo); 
 	}else{
 		return;
 	}
 });
 function getData() {                          
 	var totalData = chrome.extension.getBackgroundPage().totalData;     
-	
-	if(totalData.displayData){
-		if(totalData.displayData.length>0){
-			$("#testarea").text(totalData.displayData);
-			$("#message").text(totalData.downloadStatus);
-		}else{
-			//没取到数据
-		}
+	if(totalData.displayData!=null&&totalData.displayData.length){
+		$("#testarea").text(totalData.displayData);
+		$("#message").text(totalData.downloadStatus);
+//		$("#message").text("正在下载"+chrome.extension.getBackgroundPage().totalInfoAndCurrentDownloadInfo.currentDItemIndexInTotal+"-"+chrome.extension.getBackgroundPage().totalInfoAndCurrentDownloadInfo.cPicName+"");
 	}else{
-		//没有取到数据
+		//没取到数据
 	}
-	
+	$("#maxDownloadConfig").val(chrome.extension.getBackgroundPage().maxDownloadConfig?chrome.extension.getBackgroundPage().maxDownloadConfig:100);
+	$("#startDownloadConfig").val(chrome.extension.getBackgroundPage().startDownloadConfig?chrome.extension.getBackgroundPage().startDownloadConfig:1);
+	$("#timeP").val(chrome.extension.getBackgroundPage().timeP?chrome.extension.getBackgroundPage().timeP/1000:2);
+	$("#timeI").val(chrome.extension.getBackgroundPage().timeI?chrome.extension.getBackgroundPage().timeI/1000:15);
+	$("#timeRnd").val(chrome.extension.getBackgroundPage().timeRnd?chrome.extension.getBackgroundPage().timeRnd/1000:9);
+	$("#messageD").text("keyWord:"+chrome.extension.getBackgroundPage().totalInfoAndCurrentDownloadInfo.keyword+"; 共"+chrome.extension.getBackgroundPage().totalInfoAndCurrentDownloadInfo.totalItemsAmount+"条"); 
 	
 }
 function initClick() {                          
+	document.querySelector('#config').addEventListener('click', setBgConfig);                                                     
 	document.querySelector('#bClear').addEventListener(                       
 			'click', bClear);                                                     
 	document.querySelector('#bStop').addEventListener(                       
-			'click', chrome.extension.getBackgroundPage().bStop);                                                     
-	document.querySelector('#bStart').addEventListener(                       
-			'click', chrome.extension.getBackgroundPage().bStart);                                                     
-	document.querySelector('#bReStart').addEventListener(                       
-			'click', chrome.extension.getBackgroundPage().bReStart);                                                     
-	document.querySelector('#bCheck').addEventListener(                       
-			'click', bCheck);                                                     
+			'click', chrome.extension.getBackgroundPage().bStop);  
+	
+	document.querySelector('#bStart').addEventListener('click', pBStart);                                                     
+	document.querySelector('#bResume').addEventListener('click', pBResume);                                                     
+//	document.querySelector('#bCheck').addEventListener('click', bCheck);                                                     
 	document.querySelector('#bExport').addEventListener(                       
 			'click', bExport);                                                     
-	document.querySelector('#bExportJson').addEventListener(                       
-			'click', bExportJson);                                                     
+//	document.querySelector('#bExportJson').addEventListener('click', bExportJson);                                                     
 }
+function setBgConfig(){
+	var maxDownloadConfig=Number($("#maxDownloadConfig").val());
+	var startDownloadConfig=Number($("#startDownloadConfig").val());
+	tSendMsgToBg("setBgConfig",{maxD:maxDownloadConfig,startD:startDownloadConfig,dConfig:getDisplayConfig(),time:getTime()});
+}
+function pBStart(){
+	var maxDownloadConfig=Number($("#maxDownloadConfig").val());
+	var startDownloadConfig=Number($("#startDownloadConfig").val());
+	 tSendMsgToBg("pupupStart-withConfig",{maxD:maxDownloadConfig,startD:startDownloadConfig,dConfig:getDisplayConfig(),time:getTime()});
+}
+function pBResume(){
+	var maxDownloadConfig=Number($("#maxDownloadConfig").val());
+	tSendMsgToBg("pupupResume-withConfig",{maxD:maxDownloadConfig,dConfig:getDisplayConfig(),time:getTime()});
+}
+
+function getDisplayConfig(){
+	var displayConfig={};
+	displayConfig.dNo=$("input:checkbox[name='dNo']").is(":checked")
+	displayConfig.dPageNo=$("input:checkbox[name='dPageNo']").is(":checked")
+	displayConfig.dIndexInPage=$("input:checkbox[name='dIndexInPage']").is(":checked")
+	displayConfig.dKeywordAndNo=$("input:checkbox[name='dKeywordAndNo']").is(":checked")
+	return displayConfig;
+}
+function getTime(){
+	return {p:Number($("#timeP").val())*1000,i:Number($("#timeI").val())*1000,rnd:Number($("#timeRnd").val())*1000}
+}
+
 function initPage() {   
 	initClick();
 	getData();
 }
-
-
 
 function bCheck() {
 	var result = chrome.extension.getBackgroundPage().totalData.jsonTotalDatas;	
@@ -65,16 +90,12 @@ function bCheck() {
 				loseRows+=j+",";
 			}
 		}
-		
 	};
 	if (loseRows.length==0){
 		$("#message").text("数据完整"); 
 	}else{
 		$("#message").text("缺少如下数据："+loseRows); 
 	}
-	
-	
-	
 }
 function utf8_to_b64( str ) {
     return window.btoa(unescape(encodeURIComponent( str )));
@@ -91,7 +112,6 @@ function bExport() {
 		      height: 600
 		    }
 		  });*/
-
     // Save as file
     var url = 'data:application/txt;base64,' + utf8_to_b64(result);
     chrome.downloads.download({
@@ -111,9 +131,16 @@ function bExportJson() {
 }
 
 function bClear(){
-//	alert(11);
 	chrome.extension.getBackgroundPage().totalData={jsonTotalDatas:[]};
 	$("#testarea").text(""); 
 }
 
 document.addEventListener('DOMContentLoaded', initPage);                                                                                  
+
+function tSendMsgToBg(msgType,data) {
+	var msg = {};
+	msg.type = msgType;
+	msg.data=data;
+	chrome.runtime.sendMessage(msg);
+};
+
