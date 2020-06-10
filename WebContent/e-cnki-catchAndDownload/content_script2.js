@@ -23,15 +23,10 @@ var trs=$("table.GridTableContent tr").length>0?$("table.GridTableContent tr"):$
 
 
 
-var tagTotalItemsAmount="#queryCount";
-var tagItemsAmountPerPage="#srPageCount";
+/*var tagTotalItemsAmount="#queryCount";
+var tagItemsAmountPerPage="#srPageCoun
 var tagCurrentPageIndex="#resultcontent table:eq(0) li.active";
-// $("#resultcontent table:eq(0) li.active").text()
-//cs 里的totalInfoAndCurrentDownloadInfo变量似乎可以取消
-
-// 新建页面需要变量
-var $divIframe;
-var $iframeEmbed;
+*///cs 里的totalInfoAndCurrentDownloadInfo变量似乎可以取消,后来发现不行，这个变量要在iframe 的回调函数里付值
 var totalInfoAndCurrentDownloadInfo = {
 		totalItemsAmount : 0,
 		totalPageAmount : 0,
@@ -39,24 +34,30 @@ var totalInfoAndCurrentDownloadInfo = {
 		currentDPageIndex : 0, // 1开始
 		currentDItemIndexInTotal : 0,// 1开始
 		currentDItemIndexInPage : 0,// 1开始
+		cImageUrl:"",
+		cPicName:"",
+		displayData:""	
 	};
+var $divIframe;
+var $iframeEmbed;
 function catchStop(request, sender, sendRequest) {
 	if (request.type == "wolf-catch-stop") {
 		stopCatchAndDl();
 	} else if (request.type == "msg-catch&downloadThisItem-withTotalInfo") {
 		// 取得itemIndex，catch一条并下载，
-		var totalInfoAndCurrentDownloadInfo2 = {
-			};
+		var totalInfoAndCurrentDownloadInfo2 = {};
 		totalInfoAndCurrentDownloadInfo2=request.data;
+			//翻页，重新加载的情况；
 		checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2);
-	} else if (request.type == "firstStart") {
+	} else if (request.type == "firstStart") {//可以删除
+	var startDownloadConfig=request.data.startDownloadConfig;
 		// 获取总体信息，传到bg存储，以这些信息为循环信息
-		var totalInfoAndCurrentDownloadInfo={
+		var totalInfoAndCurrentDownloadInfo2={
 				totalItemsAmount : 0,
 				totalPagesAmount : 0 ,
 				itemsAmountPerPage:0,
 				currentDPageIndex:1,  // 1开始
-				currentDItemIndexInTotal:1,// 1开始
+				currentDItemIndexInTotal:startDownloadConfig,// 1开始
 				currentDItemIndexInPage:0,//1开始
 		};
 		/*与页面相关变量*/
