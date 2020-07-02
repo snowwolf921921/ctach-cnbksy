@@ -60,25 +60,10 @@ function catchStop(request, sender, sendRequest) {
 				currentDItemIndexInTotal:startDownloadConfig,// 1开始
 				currentDItemIndexInPage:0,//1开始
 		};
-		/*与页面相关变量*/
-//		var currentPageCount=Number($("#id_grid_display_num a font").text()!=""?$("#id_grid_display_num a font").text():$(window.frames["iframeResult"].document).find("#id_grid_display_num a font").text());
-//		var currentPageRowAccount=$("table.GridTableContent tr").length>0?$("table.GridTableContent tr").length:$(window.frames["iframeResult"].document).find("table.GridTableContent tr").length-1;
-	//下载内容的tr的集合，jquery对象，包括标题	
-		
-		var trs=$("table.GridTableContent tr").length>0?$("table.GridTableContent tr"):$(window.frames["iframeResult"].document).find("table.GridTableContent tr");
-		
-		
-
-		$("div.pagerTitleCell").eq(0).text()
-		totalInfoAndCurrentDownloadInfo.totalItemsAmount=Number($(tagTotalItemsAmount).text());
-		
-//怎么自动化的取到总数量，和每页数量？和抓取内容循环
-		
-		// totalCatchjobInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($(tagTotalItemsAmount));
-		totalInfoAndCurrentDownloadInfo.itemsAmountPerPage=Number($("table.GridTableContent tr").length>0?$("table.GridTableContent tr").length:$(window.frames["iframeResult"].document).find("table.GridTableContent tr").length-1);
 		var msg = {};
-		msg.type = "totalInfo";
-		msg.data=totalInfoAndCurrentDownloadInfo;
+		msg.type = "firstStartToBg";
+		msg.data=totalInfoAndCurrentDownloadInfo2;
+		//iframe
 		creatIframeAndLoadFunc();
 		$("body").append($divIframe);
 		chrome.runtime.sendMessage(msg);
@@ -90,19 +75,59 @@ chrome.runtime.onMessage.addListener(catchStop);
 //****************把totalInfoAndCurrentDownloadInfo改成全局变量?需要仔细检查
 function checkCPageThenCatchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 // check current page index ==totalInfoAndCurrentDownloadInfo.pageIndex
-//	totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo2;
+	totalInfoAndCurrentDownloadInfo2.keyword=pGetKeyword();
+	totalInfoAndCurrentDownloadInfo2.totalItemsAmount=pGetTotalItemsAmountNumber();
+	totalInfoAndCurrentDownloadInfo2.itemsAmountPerPage=pGetItemsAmountPerPage();
 	totalInfoAndCurrentDownloadInfo2.currentDPageIndex= tCaltulatePageIndex(totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal,totalInfoAndCurrentDownloadInfo2.itemsAmountPerPage);
-	//
+	totalInfoAndCurrentDownloadInfo=totalInfoAndCurrentDownloadInfo2;
 	if(Number($(tagCurrentPageIndex).text())==totalInfoAndCurrentDownloadInfo2.currentDPageIndex){
+		//翻页，重新加载的情况；
+		if($iframeEmbed==null){
+			creatIframeAndLoadFunc();
+			$("body").append($divIframe);
+		}
 		catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2)
-	}else{
-//		通知bg 记录，并翻页
+	}else{if(Number($(tagCurrentPageIndex).text())+1==totalInfoAndCurrentDownloadInfo2.currentDPageIndex){
+//		需要下一页的情况，通知bg 记录，并翻页
 		var msgDownload = {};
 		tSendMessage("askCS-downloadSameItem-afterAWhile",totalInfoAndCurrentDownloadInfo2);
-		tNextPage();
+		pNextPage();
 		// 放到bg 过一段时间等cs翻完页在，bg 向cs发消息继续抓取
 		// 考虑翻页不成功情况？通知bg？记录如较长时间没有到下个item，通知cs重新下载，并记录问题;
+	}else {
+		alert("要下载的第"+totalInfoAndCurrentDownloadInfo2.currentDItemIndexInTotal+"不在当前页中");
 	}	
+}
+/* 新建iframe打开一个新的item的url，在iframe内实现下载。20200606
+ */
+function creatIframeAndLoadFunc(){
+	$divIframe = $( "<div id='divIframe' style='position:absolute;top:900px;left:100px;overflow: scroll; border: 1px solid;'></div>" );
+	$iframeEmbed = $( "<iframe id='embedIframe' border='2px' height='1000px' width='1000px' display='inline'></iframe>" );
+	$iframeEmbed.attr("src","https://kns.cnki.net/kns/detail/detail.aspx?QueryID=3&CurRec=1&recid=&FileName=YSSH201801003&DbName=CJFDLAST2018&DbCode=CJFQ&yx=&pr=CJFV2018;&URLID=&bsm=QS0104;V02;")
+    $divIframe.append($iframeEmbed);
+	$("body").append($divIframe);
+	$iframeEmbed.load(function(){
+		var itemTrInfo={};
+		var t1="";
+		t1=$iframeEmbed.contents().find('.card_text dl dt').text().trim();
+		/*var t2=$iframeEmbed.contents().find('.card_text dl dd').eq(0).text().trim();
+		var t3=$iframeEmbed.contents().find('.card_text dl dd').eq(1).text().trim();
+		var t4=$iframeEmbed.contents().find('.card_text dl dd').eq(2).text().trim();*/
+		if(t1.length>0){
+			itemTrInfo.text=t1
+			$iframeEmbed.contents().find('.card_text dl dd:not(.bnt_content)').each(function(){
+				itemTrInfo.text+="|"+(removeHTMLTag($(this).text().trim()).length>0?removeHTMLTag($(this).text().trim()):"");
+			})
+			itemTrInfo.text+=";\n";
+			var cPicName=t1;
+			totalInfoAndCurrentDownloadInfo.itemTrInfo = itemTrInfo.text;
+			totalInfoAndCurrentDownloadInfo.cPicName = cPicName;
+			tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo);
+		}else{
+			//没取到标题信息，很大可能是出现了验证码
+			tSendMsgToPopup("popup-displayThisInfo",{info:"没取到标题信息，很大可能是出现了验证码"});
+		}
+	});
 }
 function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 	// 计算item在当页第几项，应该和计算第几页currentDPageIndex放到一起，是否放到bg中？
@@ -139,38 +164,7 @@ function catchAndDownloadOneItem(totalInfoAndCurrentDownloadInfo2){
 		tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo2);
 	}
 }
-/*
- * 新建iframe打开一个新的item的url，在iframe内实现下载。20200606
- */
-function creatIframeAndLoadFunc(){
-	$divIframe = $( "<div id='divIframe' style='position:absolute;top:900px;left:100px;overflow: scroll; border: 1px solid;'></div>" );
-	$iframeEmbed = $( "<iframe id='embedIframe' border='2px' height='1000px' width='1000px' display='inline'></iframe>" );
-	$iframeEmbed.attr("src","https://kns.cnki.net/kns/detail/detail.aspx?QueryID=3&CurRec=1&recid=&FileName=YSSH201801003&DbName=CJFDLAST2018&DbCode=CJFQ&yx=&pr=CJFV2018;&URLID=&bsm=QS0104;V02;")
-    $divIframe.append($iframeEmbed);
-	$("body").append($divIframe);
-	$iframeEmbed.load(function(){
-		var itemTrInfo={};
-		var t1="";
-		t1=$iframeEmbed.contents().find('.card_text dl dt').text().trim();
-		/*var t2=$iframeEmbed.contents().find('.card_text dl dd').eq(0).text().trim();
-		var t3=$iframeEmbed.contents().find('.card_text dl dd').eq(1).text().trim();
-		var t4=$iframeEmbed.contents().find('.card_text dl dd').eq(2).text().trim();*/
-		if(t1.length>0){
-			itemTrInfo.text=t1
-			$iframeEmbed.contents().find('.card_text dl dd:not(.bnt_content)').each(function(){
-				itemTrInfo.text+="|"+(removeHTMLTag($(this).text().trim()).length>0?removeHTMLTag($(this).text().trim()):"");
-			})
-			itemTrInfo.text+=";\n";
-			var cPicName=t1;
-			totalInfoAndCurrentDownloadInfo.itemTrInfo = itemTrInfo.text;
-			totalInfoAndCurrentDownloadInfo.cPicName = cPicName;
-			tSendMessage("currentItemInfo-downloadNextItem",totalInfoAndCurrentDownloadInfo);
-		}else{
-			//没取到标题信息，很大可能是出现了验证码
-			tSendMsgToPopup("popup-displayThisInfo",{info:"没取到标题信息，很大可能是出现了验证码"});
-		}
-	});
-}
+
 function tSendMessage(msgType,data){
 	var msg = {};
 	msg.type=msgType;
@@ -241,83 +235,8 @@ function click(el) {
 };
 // 问题处
 
-function tNextPage() {
+function pNextPage() {
 //	if ( bAllowNextPage == true) {
 		click($("#resultcontent").find("table").eq(0).find("li").last().prev().find("a")[0]);
 //	} 
 }
-/*
-function getCurrentPageData(){
-	if(bAllowNextPage){	
-		var msg = {};
-				msg.type = "wolf-catch-pagedata";
-				// 当前在第几页
-				var currentPageNo =$("#resultcontent").find("table").eq(0).find("li.active").text()
-				var data = {
-					records : [],
-					pageDispalyText : ''
-				};
-		// 容错处理
-		var rowEmpty=false;
-		data=getTableDataAndDl(currentPageNo);
-		if(!data.rowEmpty){
-			msg.data = data;
-			chrome.runtime.sendMessage(msg);
-		}
-		if (waitingDownload){stopCatch()};
-	}	
-}
-function getDomainFromUrl(url){
-	var host = "null";
-	if(typeof url == "undefined" || null == url)
-		url = window.location.href;
-	var match = url.match(regex);
-	if(typeof match != "undefined" && null != match)
-		host = match[1];
-	return host;
-}
-
-function finishLoad(){
-	return !($(".xubox_msg,.xubox_text").text()=="正在检索中...");
-}
-function checkForValidUrl(tabId, changeInfo, tab) {
-	if(toolGetDomainFromUrl(tab.url).toLowerCase()=="www.cnblogs.com"){
-		chrome.pageAction.show(tabId);
-	}
-};	
-
-function haveNextPage(){
-	// needchange
-	if($("#resultcontent").find("table").eq(0).find("li").last().find("a").hasClass("next")){
-		return true;
-	}else{
-		return false;
-	}
-};
-function  checkGetDataDlAndNextPage(){
-	if (finishLoad()){
-		getCurrentPageData();
-		
-		if(!haveNextPage()){
-			// 没有下页，但是可能仍在下载，只停止抓取，所以不停止下载，让消息进程去停止下载
-			stopCatch();
-		}else if(bAllowNextPage){
-			// 可以下页的情况
-			nextPage();
-		}else{
-			// 有下一页不容许，下页的请，可能是在下载，只停止抓取，所以不停止下载，让消息进程去停止下载
-			stopCatch();
-		}
-	}
-}
-
-function stopCatch(){
-	bAllowNextPage = false;
-	window.clearInterval(intInterval);
-}
-function stopCatchAndDl(){
-	bAllowNextPage = false;
-	bAllowDl = false;
-// window.stop();
-	window.clearInterval(intInterval);
-}*/

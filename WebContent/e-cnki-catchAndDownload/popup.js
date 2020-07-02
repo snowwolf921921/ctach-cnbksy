@@ -28,16 +28,13 @@ function getData() {
 }
 function initClick() {                          
 	document.querySelector('#config').addEventListener('click', setBgConfig);                                                     
-	document.querySelector('#bClear').addEventListener(                       
-			'click', bClear);                                                     
-	document.querySelector('#bStop').addEventListener(                       
-			'click', chrome.extension.getBackgroundPage().bStop);  
+	document.querySelector('#bClear').addEventListener('click', bClear);                                                     
+	document.querySelector('#bStop').addEventListener('click', chrome.extension.getBackgroundPage().bStop);  
 	
 	document.querySelector('#bStart').addEventListener('click', pBStart);                                                     
 	document.querySelector('#bResume').addEventListener('click', pBResume);                                                     
 //	document.querySelector('#bCheck').addEventListener('click', bCheck);                                                     
-	document.querySelector('#bExport').addEventListener(                       
-			'click', bExport);                                                     
+	document.querySelector('#bExport').addEventListener('click', bExport);                                                     
 //	document.querySelector('#bExportJson').addEventListener('click', bExportJson);                                                     
 }
 function setBgConfig(){
