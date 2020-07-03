@@ -1,7 +1,8 @@
 eclipse.preferences.version=1
-encoding//WebContent/e-cnki-catchAndDownload/manifest.json=UTF-8
-encoding//WebContent/e-cnki-catchAndDownload/popup.css=UTF-8
-encoding//WebContent/e-cnki-catchAndDownload/tabs_api.html=UTF-8
-encoding//WebContent/e-cnki-catchAndDownload/tabs_api.js=UTF-8
+encoding//WebContent/cnbksy-catch-list-download/background.js=UTF-8
+encoding//WebContent/cnbksy-catch-list-download/manifest.json=UTF-8
+encoding//WebContent/cnbksy-catch-list-download/popup.css=UTF-8
+encoding//WebContent/cnbksy-catch-list-download/tabs_api.html=UTF-8
+encoding//WebContent/cnbksy-catch-list-download/tabs_api.js=UTF-8
 encoding//WebContent/testjquery.html=UTF-8
 encoding/<project>=UTF-8
