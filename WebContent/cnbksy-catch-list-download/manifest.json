@@ -1,22 +1,32 @@
 ﻿{
 	
-	"name": "a cnbksy catch list download",
-	"version": "0.0.1",
+	"name": "a cnki catch pdf download 20200826",
+	"version": "20.8.26",
 	"background": { "scripts": ["jquery-2.0.0.min.js", "background.js"] },
 	"browser_action": {
 		"default_icon": {
 			"19": "cnblogs_19.png",
 			"38": "cnblogs_38.png"
 		},
-		"default_title": "cnblogs.com article information", /* shown in tooltip*/
+		"default_title": "cnki pdf download", /* shown in tooltip*/
 		"default_popup": "popup.html"
 	},
-	"permissions" : ["tabs","http://*.cnbksy.com/*","tabs","downloads"],//"permissions" : ["tabs","http://*.cnbksy.com/*","downloads"],
+	"permissions" : ["http://*.cnki.*/*","tabs","downloads","webNavigation","webRequest"],//"permissions" : ["tabs","http://*.cnbksy.com/*","downloads"],
 	"content_scripts":[{
-		"matches":["http://*.cnbksy.com/*"],//"matches":["http://*.cnbksy.com/*"],	
+		"matches":["http://*.cnki.*"],//"matches":["http://*.cnbksy.com/*"],	
 		"all_frames": true,
 		"js":["jquery-2.0.0.min.js", "content_script2.js"]
 	}],
+	"commands":{
+		"toggle-stop-cn":{
+			"suggested_key":{
+				"default":"Ctrl+Shift+3",
+				"mac":"Command+Shift+3"
+			},
+			"description":"stop cnki js",
+			"global":true
+		}
+	},
 	"manifest_version": 2
 }
 

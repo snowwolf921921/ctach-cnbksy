@@ -29,7 +29,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendRequest){
 });
 function getData() {                          
 	var totalData = chrome.extension.getBackgroundPage().totalData;     
-	if(totalData.displayData.length>0){
+	if(totalData.displayData&&totalData.displayData.length>0){
 		$("#testarea").text(totalData.displayData);
 		$("#message").text(totalData.downloadStatus);
 	}else{
@@ -44,6 +44,7 @@ function initClick() {
 			'click', chrome.extension.getBackgroundPage().bStop);                                                     
 	document.querySelector('#bStart').addEventListener(                       
 			'click', chrome.extension.getBackgroundPage().bStart);                                                     
+	document.querySelector('#bResume').addEventListener('click', chrome.extension.getBackgroundPage().bResume);                                                     
 	document.querySelector('#bCheck').addEventListener(                       
 			'click', bCheck);                                                     
 	document.querySelector('#bExport').addEventListener(                       
