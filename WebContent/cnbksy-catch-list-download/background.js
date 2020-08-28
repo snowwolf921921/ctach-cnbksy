@@ -1,4 +1,7 @@
 ﻿//restart 需要读取全局变量
+
+//test
+
 var totalInfoAndCurrentDownloadInfo = {
 	totalItemsAmount : 0,
 	totalPageAmount : 0,
